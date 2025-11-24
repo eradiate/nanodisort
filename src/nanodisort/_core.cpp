@@ -9,6 +9,7 @@
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+#include <sstream>
 
 extern "C" {
 #include "cdisort.h"
@@ -93,6 +94,23 @@ public:
     void set_nphi(int nphi) { ds.nphi = nphi; }
     int get_nphi() const { return ds.nphi; }
 
+    /*
+     * String representation showing key dimensions and allocation status
+     */
+    std::string repr() const {
+        std::ostringstream oss;
+        oss << "<DisortState"
+            << " nstr=" << ds.nstr
+            << " nlyr=" << ds.nlyr
+            << " nmom=" << ds.nmom
+            << " ntau=" << ds.ntau
+            << " numu=" << ds.numu
+            << " nphi=" << ds.nphi
+            << " allocated=" << (allocated ? "True" : "False")
+            << ">";
+        return oss.str();
+    }
+
     // TODO: Add methods for:
     // - Setting optical properties (dtauc, ssalb, pmom)
     // - Setting geometry (umu, phi, utau)
@@ -109,6 +127,7 @@ NB_MODULE(_core, m) {
     // DisortState class
     nb::class_<DisortState>(m, "DisortState", "DISORT solver state")
         .def(nb::init<>(), "Create a new DISORT state")
+        .def("__repr__", &DisortState::repr)
         .def("allocate", &DisortState::allocate,
              "Allocate memory for arrays based on configured dimensions")
         .def("solve", &DisortState::solve,
