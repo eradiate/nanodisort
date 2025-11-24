@@ -32,17 +32,23 @@ docs = [
     "numpydoc>=1.5",
     "sphinx-autobuild>=2024.0",
 ]
+build = [
+    "nanobind>=2.9.0",
+    "scikit-build-core>=0.11.0"
+]
 dev = [
     "ipykernel>=6.31.0",
+    "nanobind>=2.9.2",
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "ruff>=0.1.0",
     "taskipy>=1.12.0",
+    { include-group = "build" },
     { include-group = "docs" },
 ]
 
 [build-system]
-requires = ["scikit-build-core>=0.11.0", "nanobind>=2.0.0"]
+requires = ["scikit-build-core>=0.11.0", "nanobind>=2.9.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
@@ -50,9 +56,15 @@ minimum-version = "0.11"
 build-dir = "build/{wheel_tag}"
 build.verbose = true
 wheel.packages = ["src/nanodisort"]
+editable.mode = "inplace"
+editable.rebuild = true
+install.components = ["python"]
 
 [tool.scikit-build.cmake.define]
 CMAKE_CXX_STANDARD = "17"
+
+[tool.uv]
+no-build-isolation-package = ["nanodisort"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
