@@ -33,6 +33,7 @@ docs = [
     "sphinx-autobuild>=2024.0",
 ]
 dev = [
+    "ipykernel>=6.31.0",
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "ruff>=0.1.0",
