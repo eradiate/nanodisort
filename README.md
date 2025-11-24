@@ -28,7 +28,7 @@ The cdisort library offers improved performance over the original Fortran versio
 ```bash
 git clone https://github.com/rayference/nanodisort.git
 cd nanodisort
-uv sync --extra dev
+uv sync --dev
 uv pip install -e .
 ```
 
@@ -63,7 +63,7 @@ state.solve()
 ### Setup development environment
 
 ```bash
-uv sync --extra dev
+uv sync --dev
 ```
 
 ### Run tests
@@ -87,15 +87,8 @@ uv run task format
 ### Build documentation
 
 ```bash
-uv sync --extra docs
 uv run task docs
 ```
-
-## Citation
-
-If you use nanodisort in your research, please cite:
-
-> Buras, R., Dowling, T., & Emde, C. (2011). New secondary-scattering correction in DISORT with increased efficiency for forward scattering. *Journal of Quantitative Spectroscopy and Radiative Transfer*, 112(12), 2028-2034. https://doi.org/10.1016/j.jqsrt.2011.03.019
 
 ## License
 
