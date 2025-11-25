@@ -55,10 +55,9 @@ build-backend = "scikit_build_core.build"
 minimum-version = "0.11"
 build-dir = "build/{wheel_tag}"
 build.verbose = true
-wheel.packages = ["src/nanodisort"]
-editable.mode = "inplace"
-editable.rebuild = true
+editable.mode = "redirect"
 install.components = ["python"]
+wheel.packages = ["src/nanodisort"]
 
 [tool.scikit-build.cmake.define]
 CMAKE_CXX_STANDARD = "17"

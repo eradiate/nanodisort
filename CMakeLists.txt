@@ -40,4 +40,4 @@ target_link_libraries(_core PRIVATE cdisort)
 target_include_directories(_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/cdisort-2.1.3)
 
 # Install the extension module
-install(TARGETS _core LIBRARY DESTINATION nanodisort)
+install(TARGETS _core LIBRARY DESTINATION nanodisort COMPONENT python)
