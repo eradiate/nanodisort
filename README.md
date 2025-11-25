@@ -66,6 +66,12 @@ state.solve()
 uv sync --dev
 ```
 
+### (Re)build C++ module
+
+```bash
+uv pip install -ve.
+```
+
 ### Run tests
 
 ```bash
