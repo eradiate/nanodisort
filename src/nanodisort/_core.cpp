@@ -9,6 +9,7 @@
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+#include <algorithm>
 #include <sstream>
 
 extern "C" {
@@ -21,6 +22,65 @@ using namespace nb::literals;
 // Type aliases for numpy arrays
 using ArrayD1 = nb::ndarray<double, nb::ndim<1>, nb::c_contig, nb::device::cpu>;
 using ArrayD2 = nb::ndarray<double, nb::ndim<2>, nb::c_contig, nb::device::cpu>;
+
+// Error message constants
+constexpr const char* NOT_ALLOCATED_ERROR = "Memory not allocated. Call allocate() first.";
+constexpr const char* OUTPUT_UNAVAILABLE_ERROR = "Output not available. Run solve() first.";
+
+// Macros for property getters/setters to reduce boilerplate
+
+// Integer dimension properties
+#define DEFINE_INT_PROPERTY(name, member) \
+    void set_##name(int value) { member = value; } \
+    int get_##name() const { return member; }
+
+// Flag properties (bool <-> TRUE/FALSE conversion)
+#define DEFINE_FLAG_PROPERTY(name, member) \
+    void set_##name(bool val) { member = val ? TRUE : FALSE; } \
+    bool get_##name() const { return member == TRUE; }
+
+// Scalar double properties
+#define DEFINE_SCALAR_PROPERTY(name, member) \
+    void set_##name(double value) { member = value; } \
+    double get_##name() const { return member; }
+
+// 1D array properties with size checking
+#define DEFINE_ARRAY_PROPERTY(name, member, size_expr) \
+    void set_##name(ArrayD1 arr) { \
+        check_allocated(); \
+        check_array_size(arr, size_expr, #name); \
+        std::copy_n(arr.data(), size_expr, member); \
+    } \
+    auto get_##name() { \
+        check_allocated(); \
+        size_t shape[1] = {static_cast<size_t>(size_expr)}; \
+        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(member, 1, shape); \
+    }
+
+// Output array property (read-only, creates owned copy)
+#define DEFINE_OUTPUT_PROPERTY(name, field) \
+    auto get_##name() { \
+        check_allocated(); \
+        if (!out.rad) { \
+            throw std::runtime_error(OUTPUT_UNAVAILABLE_ERROR); \
+        } \
+        double* data = new double[ds.ntau]; \
+        for (int i = 0; i < ds.ntau; i++) { \
+            data[i] = out.rad[i].field; \
+        } \
+        size_t shape[1] = {static_cast<size_t>(ds.ntau)}; \
+        nb::capsule owner(data, [](void *p) noexcept { \
+            delete[] static_cast<double*>(p); \
+        }); \
+        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner); \
+    }
+
+// Nanobind property binding macros
+#define BIND_PROPERTY_RW(name, doc) \
+    .def_prop_rw(#name, &DisortState::get_##name, &DisortState::set_##name, doc)
+
+#define BIND_PROPERTY_RO(name, doc) \
+    .def_prop_ro(#name, &DisortState::get_##name, nb::rv_policy::move, doc)
 
 /*
  * DisortState class - wraps cdisort's disort_state structure
@@ -76,23 +136,81 @@ public:
     }
 
     // Dimension setters/getters
-    void set_nstr(int nstr) { ds.nstr = nstr; }
-    int get_nstr() const { return ds.nstr; }
+    DEFINE_INT_PROPERTY(nstr, ds.nstr)
+    DEFINE_INT_PROPERTY(nlyr, ds.nlyr)
+    DEFINE_INT_PROPERTY(nmom, ds.nmom)
+    DEFINE_INT_PROPERTY(ntau, ds.ntau)
+    DEFINE_INT_PROPERTY(numu, ds.numu)
+    DEFINE_INT_PROPERTY(nphi, ds.nphi)
 
-    void set_nlyr(int nlyr) { ds.nlyr = nlyr; }
-    int get_nlyr() const { return ds.nlyr; }
+    // Control flags
+    DEFINE_FLAG_PROPERTY(usrtau, ds.flag.usrtau)
+    DEFINE_FLAG_PROPERTY(usrang, ds.flag.usrang)
+    DEFINE_FLAG_PROPERTY(lamber, ds.flag.lamber)
+    DEFINE_FLAG_PROPERTY(planck, ds.flag.planck)
+    DEFINE_FLAG_PROPERTY(onlyfl, ds.flag.onlyfl)
+    DEFINE_FLAG_PROPERTY(quiet, ds.flag.quiet)
+    DEFINE_FLAG_PROPERTY(intensity_correction, ds.flag.intensity_correction)
+    DEFINE_FLAG_PROPERTY(spher, ds.flag.spher)
 
-    void set_nmom(int nmom) { ds.nmom = nmom; }
-    int get_nmom() const { return ds.nmom; }
+    // Boundary conditions
+    DEFINE_SCALAR_PROPERTY(fbeam, ds.bc.fbeam)
+    DEFINE_SCALAR_PROPERTY(umu0, ds.bc.umu0)
+    DEFINE_SCALAR_PROPERTY(phi0, ds.bc.phi0)
+    DEFINE_SCALAR_PROPERTY(fisot, ds.bc.fisot)
+    DEFINE_SCALAR_PROPERTY(fluor, ds.bc.fluor)
+    DEFINE_SCALAR_PROPERTY(albedo, ds.bc.albedo)
+    DEFINE_SCALAR_PROPERTY(btemp, ds.bc.btemp)
+    DEFINE_SCALAR_PROPERTY(ttemp, ds.bc.ttemp)
+    DEFINE_SCALAR_PROPERTY(temis, ds.bc.temis)
 
-    void set_ntau(int ntau) { ds.ntau = ntau; }
-    int get_ntau() const { return ds.ntau; }
+    // Other scalar parameters
+    DEFINE_SCALAR_PROPERTY(accur, ds.accur)
+    DEFINE_SCALAR_PROPERTY(wvnmlo, ds.wvnmlo)
+    DEFINE_SCALAR_PROPERTY(wvnmhi, ds.wvnmhi)
 
-    void set_numu(int numu) { ds.numu = numu; }
-    int get_numu() const { return ds.numu; }
+    // Array setters/getters - require allocation first
+    DEFINE_ARRAY_PROPERTY(dtauc, ds.dtauc, ds.nlyr)
+    DEFINE_ARRAY_PROPERTY(ssalb, ds.ssalb, ds.nlyr)
 
-    void set_nphi(int nphi) { ds.nphi = nphi; }
-    int get_nphi() const { return ds.nphi; }
+    void set_pmom(ArrayD2 arr) {
+        check_allocated();
+        int expected_size = (ds.nmom_nstr + 1) * ds.nlyr;
+        if (arr.shape(0) != ds.nmom_nstr + 1 || arr.shape(1) != ds.nlyr) {
+            throw std::runtime_error(
+                "pmom array shape mismatch. Expected ("
+                + std::to_string(ds.nmom_nstr + 1) + ", "
+                + std::to_string(ds.nlyr) + ")"
+            );
+        }
+        std::copy_n(arr.data(), expected_size, ds.pmom);
+    }
+
+    auto get_pmom() {
+        check_allocated();
+        size_t shape[2] = {
+            static_cast<size_t>(ds.nmom_nstr + 1),
+            static_cast<size_t>(ds.nlyr)
+        };
+        return nb::ndarray<nb::numpy, double, nb::ndim<2>>(
+            ds.pmom, 2, shape
+        );
+    }
+
+    DEFINE_ARRAY_PROPERTY(umu, ds.umu, ds.numu)
+    DEFINE_ARRAY_PROPERTY(phi, ds.phi, ds.nphi)
+    DEFINE_ARRAY_PROPERTY(utau, ds.utau, ds.ntau)
+    DEFINE_ARRAY_PROPERTY(temper, ds.temper, ds.nlyr + 1)
+
+    // Output accessors (read-only) - create copies owned by Python
+    DEFINE_OUTPUT_PROPERTY(rfldir, rfldir)
+    DEFINE_OUTPUT_PROPERTY(rfldn, rfldn)
+    DEFINE_OUTPUT_PROPERTY(flup, flup)
+    DEFINE_OUTPUT_PROPERTY(dfdt, dfdt)
+    DEFINE_OUTPUT_PROPERTY(uavg, uavg)
+    DEFINE_OUTPUT_PROPERTY(uavgdn, uavgdn)
+    DEFINE_OUTPUT_PROPERTY(uavgup, uavgup)
+    DEFINE_OUTPUT_PROPERTY(uavgso, uavgso)
 
     /*
      * String representation showing key dimensions and allocation status
@@ -111,11 +229,21 @@ public:
         return oss.str();
     }
 
-    // TODO: Add methods for:
-    // - Setting optical properties (dtauc, ssalb, pmom)
-    // - Setting geometry (umu, phi, utau)
-    // - Setting boundary conditions
-    // - Getting output arrays
+private:
+    void check_allocated() const {
+        if (!allocated) {
+            throw std::runtime_error(NOT_ALLOCATED_ERROR);
+        }
+    }
+
+    void check_array_size(const ArrayD1& arr, int expected, const char* name) const {
+        if (arr.shape(0) != expected) {
+            throw std::runtime_error(
+                std::string(name) + " array size mismatch. Expected "
+                + std::to_string(expected) + ", got " + std::to_string(arr.shape(0))
+            );
+        }
+    }
 };
 
 /*
@@ -133,16 +261,51 @@ NB_MODULE(_core, m) {
         .def("solve", &DisortState::solve,
              "Run the DISORT solver")
         // Dimensions
-        .def_prop_rw("nstr", &DisortState::get_nstr, &DisortState::set_nstr,
-                     "Number of streams")
-        .def_prop_rw("nlyr", &DisortState::get_nlyr, &DisortState::set_nlyr,
-                     "Number of computational layers")
-        .def_prop_rw("nmom", &DisortState::get_nmom, &DisortState::set_nmom,
-                     "Number of phase function moments")
-        .def_prop_rw("ntau", &DisortState::get_ntau, &DisortState::set_ntau,
-                     "Number of user optical depths")
-        .def_prop_rw("numu", &DisortState::get_numu, &DisortState::set_numu,
-                     "Number of user polar angles")
-        .def_prop_rw("nphi", &DisortState::get_nphi, &DisortState::set_nphi,
-                     "Number of user azimuthal angles");
+        BIND_PROPERTY_RW(nstr, "Number of streams")
+        BIND_PROPERTY_RW(nlyr, "Number of computational layers")
+        BIND_PROPERTY_RW(nmom, "Number of phase function moments")
+        BIND_PROPERTY_RW(ntau, "Number of user optical depths")
+        BIND_PROPERTY_RW(numu, "Number of user polar angles")
+        BIND_PROPERTY_RW(nphi, "Number of user azimuthal angles")
+        // Control flags
+        BIND_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical depths")
+        BIND_PROPERTY_RW(usrang, "Return radiant quantities at user-specified polar angles")
+        BIND_PROPERTY_RW(lamber, "Isotropically reflecting bottom boundary")
+        BIND_PROPERTY_RW(planck, "Include thermal emission")
+        BIND_PROPERTY_RW(onlyfl, "Return only fluxes (not intensities)")
+        BIND_PROPERTY_RW(quiet, "Suppress output messages")
+        BIND_PROPERTY_RW(intensity_correction, "Apply intensity correction")
+        BIND_PROPERTY_RW(spher, "Pseudo-spherical geometry (vs plane-parallel)")
+        // Boundary conditions
+        BIND_PROPERTY_RW(fbeam, "Intensity of incident parallel beam")
+        BIND_PROPERTY_RW(umu0, "Polar angle cosine of incident beam")
+        BIND_PROPERTY_RW(phi0, "Azimuth angle of incident beam (degrees)")
+        BIND_PROPERTY_RW(fisot, "Intensity of top-boundary isotropic illumination")
+        BIND_PROPERTY_RW(fluor, "Intensity of bottom-boundary isotropic illumination")
+        BIND_PROPERTY_RW(albedo, "Albedo of bottom boundary")
+        BIND_PROPERTY_RW(btemp, "Temperature [K] of bottom boundary")
+        BIND_PROPERTY_RW(ttemp, "Temperature [K] of top boundary")
+        BIND_PROPERTY_RW(temis, "Emissivity of top boundary")
+        // Other scalar parameters
+        BIND_PROPERTY_RW(accur, "Convergence criterion for azimuthal series")
+        BIND_PROPERTY_RW(wvnmlo, "Wavenumber lower bound [cm^-1] for Planck function")
+        BIND_PROPERTY_RW(wvnmhi, "Wavenumber upper bound [cm^-1] for Planck function")
+        // Optical property arrays
+        BIND_PROPERTY_RW(dtauc, "Optical depths of computational layers [nlyr]")
+        BIND_PROPERTY_RW(ssalb, "Single-scatter albedos [nlyr]")
+        BIND_PROPERTY_RW(pmom, "Phase function moments [nmom_nstr+1, nlyr]")
+        // Geometry arrays
+        BIND_PROPERTY_RW(umu, "Polar angle cosines [numu]")
+        BIND_PROPERTY_RW(phi, "Azimuthal angles [degrees] [nphi]")
+        BIND_PROPERTY_RW(utau, "User optical depths [ntau]")
+        BIND_PROPERTY_RW(temper, "Temperatures [K] at levels [nlyr+1]")
+        // Output arrays (read-only)
+        BIND_PROPERTY_RO(rfldir, "Direct beam flux (without delta-M scaling) [ntau]")
+        BIND_PROPERTY_RO(rfldn, "Diffuse downward flux (without delta-M scaling) [ntau]")
+        BIND_PROPERTY_RO(flup, "Diffuse upward flux [ntau]")
+        BIND_PROPERTY_RO(dfdt, "Flux divergence d(net flux)/d(optical depth) [ntau]")
+        BIND_PROPERTY_RO(uavg, "Mean intensity including direct beam [ntau]")
+        BIND_PROPERTY_RO(uavgdn, "Mean diffuse downward intensity [ntau]")
+        BIND_PROPERTY_RO(uavgup, "Mean diffuse upward intensity [ntau]")
+        BIND_PROPERTY_RO(uavgso, "Mean direct solar intensity [ntau]");
 }
