@@ -3,48 +3,41 @@ name = "nanodisort"
 version = "0.1.0"
 description = "Python bindings for cdisort radiative transfer solver"
 readme = "README.md"
-authors = [
-    { name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }
-]
+authors = [{ name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }]
 requires-python = ">=3.9"
-dependencies = [
-    "numpy>=1.20",
-]
+dependencies = ["numpy>=1.20"]
 license = { text = "GPL-3.0-or-later" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Scientific/Engineering :: Atmospheric Science",
-    "Topic :: Scientific/Engineering :: Physics",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Atmospheric Science",
+  "Topic :: Scientific/Engineering :: Physics",
 ]
 
 [dependency-groups]
 docs = [
-    "sphinx>=7.0",
-    "shibuya>=2024.0",
-    "numpydoc>=1.5",
-    "sphinx-autobuild>=2024.0",
+  "sphinx>=7.0",
+  "shibuya>=2024.0",
+  "numpydoc>=1.5",
+  "sphinx-autobuild>=2024.0",
 ]
-build = [
-    "nanobind>=2.9.0",
-    "scikit-build-core>=0.11.0"
-]
+build = ["nanobind>=2.9.0", "scikit-build-core>=0.11.0"]
 dev = [
-    "ipykernel>=6.31.0",
-    "nanobind>=2.9.2",
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "ruff>=0.1.0",
-    "taskipy>=1.12.0",
-    { include-group = "build" },
-    { include-group = "docs" },
+  "ipykernel>=6.31.0",
+  "nanobind>=2.9.2",
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "ruff>=0.1.0",
+  "taskipy>=1.12.0",
+  { include-group = "build" },
+  { include-group = "docs" },
 ]
 
 [build-system]
@@ -67,12 +60,7 @@ no-build-isolation-package = ["nanodisort"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--strict-config",
-    "--showlocals",
-]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
@@ -82,12 +70,12 @@ omit = ["*/tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
 ]
 
 [tool.ruff]
