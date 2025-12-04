@@ -20,5 +20,6 @@ Examples
 
 from nanodisort._core import DisortState
 
-__version__ = "0.1.0"
-__all__ = ["DisortState"]
+from ._version import _version as __version__
+
+__all__ = ["__version__", "DisortState"]

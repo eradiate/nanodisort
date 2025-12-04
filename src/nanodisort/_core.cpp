@@ -1,7 +1,7 @@
 /*
  * nanodisort - Python bindings for cdisort
  *
- * Copyright (c) 2024 Vincent Leroy
+ * Copyright (c) 2025 Rayference
  * Licensed under GPL-3.0-or-later
  */
 
@@ -145,7 +145,4 @@ NB_MODULE(_core, m) {
                      "Number of user polar angles")
         .def_prop_rw("nphi", &DisortState::get_nphi, &DisortState::set_nphi,
                      "Number of user azimuthal angles");
-
-    // Version information
-    m.attr("__version__") = "0.1.0";
 }
