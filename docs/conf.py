@@ -19,7 +19,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "numpydoc",
 ]
 
 # Napoleon settings (for Numpydoc)
