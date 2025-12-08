@@ -27,6 +27,17 @@ using ArrayD2 = nb::ndarray<double, nb::ndim<2>, nb::c_contig, nb::device::cpu>;
 constexpr const char* NOT_ALLOCATED_ERROR = "Memory not allocated. Call allocate() first.";
 constexpr const char* OUTPUT_UNAVAILABLE_ERROR = "Output not available. Run solve() first.";
 
+/*
+ * Error handling for cdisort
+ * Callback throws C++ exception that will be caught by nanobind
+ */
+
+// Error callback that will be called by cdisort instead of exit()
+// This function throws a C++ exception which will be converted to a Python exception by nanobind
+extern "C" void cdisort_error_handler(const char* message) {
+    throw std::runtime_error(std::string("DISORT error: ") + message);
+}
+
 // Macros for property getters/setters to reduce boilerplate
 
 // Integer dimension properties
@@ -98,6 +109,13 @@ public:
         // Initialize structure to zeros
         memset(&ds, 0, sizeof(disort_state));
         memset(&out, 0, sizeof(disort_output));
+
+        // Register error callback (do this once, static)
+        static bool callback_registered = false;
+        if (!callback_registered) {
+            c_set_error_callback(cdisort_error_handler);
+            callback_registered = true;
+        }
     }
 
     ~DisortState() {
@@ -120,6 +138,7 @@ public:
             c_disort_out_free(&ds, &out);
             c_disort_state_free(&ds);
         }
+
         c_disort_state_alloc(&ds);
         c_disort_out_alloc(&ds, &out);
         allocated = true;
@@ -132,6 +151,7 @@ public:
         if (!allocated) {
             throw std::runtime_error("Memory not allocated. Call allocate() first.");
         }
+
         c_disort(&ds, &out);
     }
 
