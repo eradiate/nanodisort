@@ -201,6 +201,17 @@
 #include "cdisort.h"
 #include "locate.h"
 
+/*
+ * Error callback mechanism (added for Python bindings)
+ * Allows external code to handle errors instead of exit()
+ */
+static void (*cdisort_error_callback)(const char* message) = NULL;
+
+void c_set_error_callback(void (*callback)(const char* message))
+{
+  cdisort_error_callback = callback;
+}
+
 /*============================= c_disort() ==============================*/
 
 /*-------------------------------------------------------------------------------*
@@ -1235,9 +1246,9 @@ double c_bidir_reflectivity ( double       wvnmlo,
 
     break;
   default:
-    fprintf(stderr,"bidir_reflectivity--surface BDRF model %d not known",
+    fprintf(stderr,"surface BDRF model %d not known",
 	    brdf_type);
-    c_errmsg("Exiting...",DS_ERROR);
+    c_errmsg("bidir_reflectivity--surface BDRF model not known",DS_ERROR);
   }
 
   return ans;
@@ -7953,6 +7964,14 @@ void c_errmsg(char *messag,
 
   if (type == DS_ERROR) {
     fprintf(stderr,"\n ******* ERROR >>>>>>  %s\n",messag);
+
+    /* If callback is set, call it instead of exit() */
+    if (cdisort_error_callback != NULL) {
+      cdisort_error_callback(messag);
+      return;  /* Callback should handle the error (e.g., throw exception) */
+    }
+
+    /* Default behavior: exit if no callback */
     exit(1);
   }
 

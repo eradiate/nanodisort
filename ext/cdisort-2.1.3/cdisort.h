@@ -1038,6 +1038,8 @@ void c_albtrans_spherical(disort_state *ds,
 void c_errmsg(char *messag,
               int   type);
 
+void c_set_error_callback(void (*callback)(const char* message));
+
 int c_write_bad_var(int   quiet,
                     char *varnam);
 
