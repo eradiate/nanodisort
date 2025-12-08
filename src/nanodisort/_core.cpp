@@ -155,6 +155,9 @@ public:
         c_disort(&ds, &out);
     }
 
+    // Allocation status
+    bool get_allocated() const { return allocated; }
+
     // Dimension setters/getters
     DEFINE_INT_PROPERTY(nstr, ds.nstr)
     DEFINE_INT_PROPERTY(nlyr, ds.nlyr)
@@ -280,6 +283,8 @@ NB_MODULE(_core, m) {
              "Allocate memory for arrays based on configured dimensions")
         .def("solve", &DisortState::solve,
              "Run the DISORT solver")
+        // Allocation status
+        BIND_PROPERTY_RO(allocated, "Memory allocation status")
         // Dimensions
         BIND_PROPERTY_RW(nstr, "Number of streams")
         BIND_PROPERTY_RW(nlyr, "Number of computational layers")
