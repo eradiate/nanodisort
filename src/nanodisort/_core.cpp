@@ -23,10 +23,6 @@ using namespace nb::literals;
 using ArrayD1 = nb::ndarray<double, nb::ndim<1>, nb::c_contig, nb::device::cpu>;
 using ArrayD2 = nb::ndarray<double, nb::ndim<2>, nb::c_contig, nb::device::cpu>;
 
-// Error message constants
-constexpr const char* NOT_ALLOCATED_ERROR = "Memory not allocated. Call allocate() first.";
-constexpr const char* OUTPUT_UNAVAILABLE_ERROR = "Output not available. Run solve() first.";
-
 /*
  * Error handling for cdisort
  * Callback throws C++ exception that will be caught by nanobind
@@ -73,7 +69,7 @@ extern "C" void cdisort_error_handler(const char* message) {
     auto get_##name() { \
         check_allocated(); \
         if (!out.rad) { \
-            throw std::runtime_error(OUTPUT_UNAVAILABLE_ERROR); \
+            throw std::runtime_error("Output not available. Run solve() first."); \
         } \
         double* data = new double[ds.ntau]; \
         for (int i = 0; i < ds.ntau; i++) { \
@@ -257,7 +253,7 @@ public:
 private:
     void check_allocated() const {
         if (!allocated) {
-            throw std::runtime_error(NOT_ALLOCATED_ERROR);
+            throw std::runtime_error("Memory not allocated. Call allocate() first.");
         }
     }
 
