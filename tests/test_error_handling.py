@@ -37,10 +37,9 @@ def test_invalid_nstr_odd():
     disort.numu = 4
     disort.nphi = 3
 
-    # Should raise during allocation or solve
-    with pytest.raises(RuntimeError, match="DISORT error"):
+    # Should raise during allocation
+    with pytest.raises(RuntimeError, match="nstr must be positive and even"):
         disort.allocate()
-        disort.solve()
 
 
 def test_invalid_nstr_too_small():
@@ -53,10 +52,9 @@ def test_invalid_nstr_too_small():
     disort.numu = 0
     disort.nphi = 0
 
-    # Should raise during allocation or solve
-    with pytest.raises(RuntimeError, match="DISORT error"):
+    # Should raise during allocation
+    with pytest.raises(RuntimeError, match="nstr must be positive and even"):
         disort.allocate()
-        disort.solve()
 
 
 def test_invalid_nlyr_zero():
@@ -70,9 +68,8 @@ def test_invalid_nlyr_zero():
     disort.nphi = 0
 
     # Should raise during allocation
-    # Note: Some invalid configurations may hang during allocation
-    # Skip this test for now as nlyr=0 causes allocation issues
-    pytest.skip("nlyr=0 causes allocation hangs - needs investigation")
+    with pytest.raises(RuntimeError, match="nlyr must be positive"):
+        disort.allocate()
 
 
 def test_nmom_too_large():
@@ -134,7 +131,7 @@ def test_valid_configuration_works():
 
 
 def test_error_message_preserved():
-    """Test that cdisort error messages are preserved in Python exceptions."""
+    """Test that dimension validation error messages are clear and informative."""
     disort = nd.DisortState()
     disort.nstr = 3  # Invalid: must be even
     disort.nlyr = 1
@@ -143,13 +140,12 @@ def test_error_message_preserved():
     disort.numu = 0
     disort.nphi = 0
 
-    # The exception should contain information about the error
+    # The exception should contain clear information about the error
     with pytest.raises(RuntimeError) as exc_info:
         disort.allocate()
-        disort.solve()
 
-    # Verify the exception message contains "DISORT error"
-    assert "DISORT error" in str(exc_info.value)
+    # Verify the exception message is informative
+    assert "nstr must be positive and even" in str(exc_info.value)
 
 
 def test_multiple_errors_sequential():

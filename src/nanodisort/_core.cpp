@@ -134,6 +134,8 @@ public:
      * Must be called after setting all dimensions and flags
      */
     void allocate() {
+        check_dimensions();
+
         if (allocated) {
             c_disort_out_free(&ds, &out);
             c_disort_state_free(&ds);
@@ -265,6 +267,15 @@ private:
                 std::string(name) + " array size mismatch. Expected "
                 + std::to_string(expected) + ", got " + std::to_string(arr.shape(0))
             );
+        }
+    }
+
+    void check_dimensions() const {
+        if (ds.nlyr <= 0) {
+            throw std::runtime_error("nlyr must be positive, got " + std::to_string(ds.nlyr));
+        }
+        if (ds.nstr <= 0 || ds.nstr % 2 != 0) {
+            throw std::runtime_error("nstr must be positive and even, got " + std::to_string(ds.nstr));
         }
     }
 };
