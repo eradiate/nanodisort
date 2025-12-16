@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 
 # Project information
 project = "nanodisort"
-copyright = "2024, Vincent Leroy"
+copyright = "2025, Rayference"
 author = "Vincent Leroy"
 release = "0.1.0"
 
@@ -19,6 +19,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
+    "sphinx_autodoc_typehints",
 ]
 
 # Napoleon settings (for Numpydoc)
@@ -64,3 +65,13 @@ autodoc_default_options = {
     "undoc-members": True,
     "exclude-members": "__weakref__",
 }
+autodoc_class_signature = "separated"
+autodoc_member_order = "bysource"
+autodoc_typehints_format = "short"
+
+# sphinx-autodoc-typehints settings
+autodoc_typehints = "both"  # Show in both signature and description
+autodoc_typehints_description_target = "all"  # Apply to all documented items
+typehints_use_signature = True
+typehints_use_signature_return = True
+always_use_bars_union = True

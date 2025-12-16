@@ -4,11 +4,16 @@ API Reference
 This page contains the API reference for nanodisort.
 
 .. autoclass:: nanodisort.DisortState
-    :exclude-members: __init__
+    :exclude-members: __init__, print_state
 
     .. automethod:: __init__
+    .. automethod:: allocate
+    .. automethod:: solve
+    .. automethod:: print_state
 
     .. rubric:: Boolean flags
+       :heading-level: 3
+
     .. autoattribute:: usrtau
     .. autoattribute:: usrang
     .. autoattribute:: lamber
@@ -18,6 +23,8 @@ This page contains the API reference for nanodisort.
     .. autoattribute:: quiet
 
     .. rubric:: Dimensions
+       :heading-level: 3
+
     .. autoattribute:: nstr
     .. autoattribute:: nlyr
     .. autoattribute:: nmom
@@ -26,6 +33,8 @@ This page contains the API reference for nanodisort.
     .. autoattribute:: nphi
 
     .. rubric:: Boundary conditions
+       :heading-level: 3
+
     .. autoattribute:: fbeam
     .. autoattribute:: umu0
     .. autoattribute:: phi0
@@ -35,5 +44,3 @@ This page contains the API reference for nanodisort.
     .. autoattribute:: btemp
     .. autoattribute:: ttemp
     .. autoattribute:: temis
-
-    .. rubric:: Other members

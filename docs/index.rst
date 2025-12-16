@@ -84,10 +84,3 @@ License
 
 nanodisort is licensed under the GNU General Public License v3.0 or later
 (GPL-3.0-or-later), consistent with the cdisort library it wraps.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

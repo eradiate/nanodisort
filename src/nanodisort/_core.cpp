@@ -284,12 +284,12 @@ NB_MODULE(_core, m) {
 
     // DisortState class
     nb::class_<DisortState>(m, "DisortState", "DISORT solver state")
-        .def(nb::init<>(), "Create a new DISORT state")
+        .def(nb::init<>(), "Create a new DISORT state.")
         .def("__repr__", &DisortState::repr)
         .def("allocate", &DisortState::allocate,
-             "Allocate memory for arrays based on configured dimensions")
+             "Allocate memory for arrays based on configured dimensions.")
         .def("solve", &DisortState::solve,
-             "Run the DISORT solver")
+             "Run the DISORT solver.")
         // Allocation status
         BIND_PROPERTY_RO(allocated, "Memory allocation status")
         // Dimensions
