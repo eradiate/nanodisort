@@ -1,7 +1,6 @@
-API Reference
-=============
 
-This page contains the API reference for nanodisort.
+``nanodisort``
+==============
 
 .. autoclass:: nanodisort.DisortState
     :exclude-members: __init__, print_state
