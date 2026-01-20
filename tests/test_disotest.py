@@ -451,3 +451,275 @@ class TestDisort03:
             expected_flup=[1.59096, 0.0],
             expected_dfdt=[0.0, 0.0],
         )
+
+
+class TestDisort04:
+    """
+    Test Problem 4: Haze-L Scattering, Beam Source
+
+    Compare to Ref. GS (Garcia-Siewert), Tables 12-16
+
+    This test examines realistic atmospheric haze scattering using the
+    Garcia-Siewert Haze-L phase function with:
+    - Optical depth: 1.0
+    - Single scattering albedos: 1.0, 0.9
+    - Multiple azimuthal angles (case c)
+    """
+
+    def run_case_04(
+        self,
+        case_idx,
+        ssalb,
+        umu0,
+        nphi,
+        phi_values,
+        expected_rfldir,
+        expected_rfldn,
+        expected_flup,
+        expected_dfdt,
+    ):
+        """
+        Helper to run a single test case for Test 4.
+
+        Parameters
+        ----------
+        case_idx : int
+            Case index (for labeling)
+        ssalb : float
+            Single scattering albedo
+        umu0 : float
+            Cosine of incident beam angle
+        nphi : int
+            Number of azimuthal angles
+        phi_values : list
+            Azimuthal angles in degrees
+        expected_* : list
+            Expected values at [0.0, 0.5, 1.0] optical depths
+        """
+        ds = DisortState()
+
+        # Set dimensions
+        ds.nstr = 32
+        ds.nlyr = 1
+        ds.nmom = 32
+        ds.ntau = 3
+        ds.numu = 6
+        ds.nphi = nphi
+
+        # Set flags
+        ds.usrtau = True
+        ds.usrang = True
+        ds.lamber = True
+        ds.planck = False
+        ds.onlyfl = False
+        ds.quiet = True
+
+        # Allocate memory
+        ds.allocate()
+
+        # Set optical properties - Haze-L phase function
+        ds.dtauc = np.array([1.0])
+        ds.ssalb = np.array([ssalb])
+        pmom = pf.haze_l(ds.nmom).reshape(-1, 1)
+        ds.pmom = pmom
+
+        # Set output optical depths
+        ds.utau = np.array([0.0, 0.5, 1.0])
+
+        # Set angles
+        ds.umu = np.array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
+        ds.phi = np.array(phi_values)
+
+        # Set beam parameters
+        ds.fbeam = np.pi
+        ds.umu0 = umu0
+        ds.phi0 = 0.0
+
+        # Set boundary conditions
+        ds.albedo = 0.0
+        ds.fisot = 0.0
+        ds.fluor = 0.0
+
+        # Run solver
+        ds.solve()
+
+        # Check outputs
+        label = chr(ord("a") + case_idx - 1)
+        print(f"\nTest 4{label}: tau=1.0, Haze-L, ssalb={ssalb}, umu0={umu0}")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        # Compare with expected values
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+
+    def test_case_4a(self):
+        """Case 4a: tau=1.0, Haze-L, ssalb=1.0, normal incidence (Table 12)"""
+        self.run_case_04(
+            case_idx=1,
+            ssalb=1.0,
+            umu0=1.0,
+            nphi=1,
+            phi_values=[0.0],
+            expected_rfldir=[3.14159, 1.90547, 1.15573],
+            expected_rfldn=[0.0, 1.17401, 1.81264],
+            expected_flup=[1.73223e-01, 1.11113e-01, 0.0],
+            expected_dfdt=[0.0, 0.0, 0.0],
+        )
+
+    def test_case_4b(self):
+        """Case 4b: tau=1.0, Haze-L, ssalb=0.9, normal incidence (Table 13)"""
+        self.run_case_04(
+            case_idx=2,
+            ssalb=0.9,
+            umu0=1.0,
+            nphi=1,
+            phi_values=[0.0],
+            expected_rfldir=[3.14159, 1.90547, 1.15573],
+            expected_rfldn=[0.0, 1.01517, 1.51554],
+            expected_flup=[1.23665e-01, 7.88690e-02, 0.0],
+            expected_dfdt=[3.43724e-01, 3.52390e-01, 3.19450e-01],
+        )
+
+    def test_case_4c(self):
+        """Case 4c: tau=1.0, Haze-L, ssalb=0.9, oblique incidence (Tables 14-16)"""
+        self.run_case_04(
+            case_idx=3,
+            ssalb=0.9,
+            umu0=0.5,
+            nphi=3,
+            phi_values=[0.0, 90.0, 180.0],
+            expected_rfldir=[1.57080, 5.77864e-01, 2.12584e-01],
+            expected_rfldn=[0.0, 7.02764e-01, 8.03294e-01],
+            expected_flup=[2.25487e-01, 1.23848e-01, 0.0],
+            expected_dfdt=[3.85003e-01, 3.37317e-01, 2.16403e-01],
+        )
+
+
+class TestDisort05:
+    """
+    Test Problem 5: Cloud C.1 Scattering, Beam Source
+
+    Compare to Ref. GS (Garcia-Siewert), Tables 19-20
+
+    This test examines realistic cloud scattering using the Garcia-Siewert
+    Cloud C.1 phase function with:
+    - Optical depth: 64.0
+    - Single scattering albedos: 1.0, 0.9
+    - Multiple output levels within the layer
+    """
+
+    def run_case_05(
+        self,
+        case_idx,
+        ssalb,
+        utau_values,
+        expected_rfldir,
+        expected_rfldn,
+        expected_flup,
+        expected_dfdt,
+    ):
+        """
+        Helper to run a single test case for Test 5.
+
+        Parameters
+        ----------
+        case_idx : int
+            Case index (for labeling)
+        ssalb : float
+            Single scattering albedo
+        utau_values : list
+            Output optical depth levels
+        expected_* : list
+            Expected values at specified optical depths
+        """
+        ds = DisortState()
+
+        # Set dimensions
+        ds.nstr = 48
+        ds.nlyr = 1
+        ds.nmom = 299  # Cloud C.1 has 298 tabulated moments
+        ds.ntau = 3
+        ds.numu = 6
+        ds.nphi = 1
+
+        # Set flags
+        ds.usrtau = True
+        ds.usrang = True
+        ds.lamber = True
+        ds.planck = False
+        ds.onlyfl = False
+        ds.quiet = True
+
+        # Allocate memory
+        ds.allocate()
+
+        # Set optical properties - Cloud C.1 phase function
+        ds.dtauc = np.array([64.0])
+        ds.ssalb = np.array([ssalb])
+        pmom = pf.cloud_c1(ds.nmom).reshape(-1, 1)
+        ds.pmom = pmom
+
+        # Set output optical depths
+        ds.utau = np.array(utau_values)
+
+        # Set angles
+        ds.umu = np.array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
+        ds.phi = np.array([0.0])
+
+        # Set beam parameters (normal incidence)
+        ds.fbeam = np.pi
+        ds.umu0 = 1.0
+        ds.phi0 = 0.0
+
+        # Set boundary conditions
+        ds.albedo = 0.0
+        ds.fisot = 0.0
+        ds.fluor = 0.0
+
+        # Run solver
+        ds.solve()
+
+        # Check outputs
+        label = chr(ord("a") + case_idx - 1)
+        print(f"\nTest 5{label}: Cloud C.1, ssalb={ssalb}")
+        print(f"  utau: {utau_values}")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        # Compare with expected values
+        # Use looser tolerances for very small values
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+
+    def test_case_5a(self):
+        """Case 5a: tau=64.0, Cloud C.1, ssalb=1.0 (Table 19)"""
+        self.run_case_05(
+            case_idx=1,
+            ssalb=1.0,
+            utau_values=[0.0, 32.0, 64.0],
+            expected_rfldir=[3.14159, 3.97856e-14, 5.03852e-28],
+            expected_rfldn=[0.0, 2.24768, 4.79851e-01],
+            expected_flup=[2.66174, 1.76783, 0.0],
+            expected_dfdt=[0.0, 0.0, 0.0],
+        )
+
+    def test_case_5b(self):
+        """Case 5b: tau=64.0, Cloud C.1, ssalb=0.9 (Table 20)"""
+        self.run_case_05(
+            case_idx=2,
+            ssalb=0.9,
+            utau_values=[3.2, 12.8, 48.0],
+            expected_rfldir=[1.28058e-01, 8.67322e-06, 4.47729e-21],
+            expected_rfldn=[1.74767, 2.33975e-01, 6.38345e-05],
+            expected_flup=[2.70485e-01, 3.74252e-02, 1.02904e-05],
+            expected_dfdt=[3.10129e-01, 4.52671e-02, 1.25021e-05],
+        )
