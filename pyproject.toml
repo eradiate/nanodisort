@@ -27,6 +27,7 @@ docs = [
   "shibuya>=2024.0",
   "sphinx-autobuild>=2024.0",
   "sphinx-autodoc-typehints>=2.0",
+  "sphinxcontrib-bibtex>=2.6.0",
 ]
 build = ["nanobind>=2.9.0", "scikit-build-core>=0.11.0"]
 dev = [

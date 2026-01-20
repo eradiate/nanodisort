@@ -64,12 +64,7 @@ Quick Start
 Citation
 --------
 
-If you use nanodisort in your research, please cite the cdisort paper:
-
-   Buras, R., Dowling, T., & Emde, C. (2011). New secondary-scattering
-   correction in DISORT with increased efficiency for forward scattering.
-   Journal of Quantitative Spectroscopy and Radiative Transfer, 112(12),
-   2028-2034. https://doi.org/10.1016/j.jqsrt.2011.03.019
+If you use nanodisort in your research, please cite the cdisort paper :cite:p:`Buras2011CDISORTCorrection`.
 
 Contents
 --------
@@ -78,6 +73,7 @@ Contents
    :maxdepth: 2
 
    api
+   references
 
 License
 -------

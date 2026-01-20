@@ -20,6 +20,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_autodoc_typehints",
+    "sphinxcontrib.bibtex",
 ]
 
 # Napoleon settings (for Numpydoc)
@@ -39,6 +40,11 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
+
+# BibTeX configuration
+bibtex_bibfiles = ["references.bib"]
+bibtex_default_style = "plain"
+bibtex_reference_style = "author_year"
 
 # Templates and static files
 templates_path = ["_templates"]
