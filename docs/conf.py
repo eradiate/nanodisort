@@ -19,7 +19,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinx_autodoc_typehints",
     "sphinxcontrib.bibtex",
 ]
 
@@ -74,10 +73,3 @@ autodoc_default_options = {
 autodoc_class_signature = "separated"
 autodoc_member_order = "bysource"
 autodoc_typehints_format = "short"
-
-# sphinx-autodoc-typehints settings
-autodoc_typehints = "both"  # Show in both signature and description
-autodoc_typehints_description_target = "all"  # Apply to all documented items
-typehints_use_signature = True
-typehints_use_signature_return = True
-always_use_bars_union = True
