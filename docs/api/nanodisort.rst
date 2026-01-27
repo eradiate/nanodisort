@@ -1,4 +1,3 @@
-
 ``nanodisort``
 ==============
 
@@ -11,7 +10,7 @@
     .. automethod:: print_state
 
     .. rubric:: Boolean flags
-       :heading-level: 3
+        :heading-level: 3
 
     .. autoattribute:: usrtau
     .. autoattribute:: usrang
@@ -22,7 +21,7 @@
     .. autoattribute:: quiet
 
     .. rubric:: Dimensions
-       :heading-level: 3
+        :heading-level: 3
 
     .. autoattribute:: nstr
     .. autoattribute:: nlyr
@@ -32,7 +31,7 @@
     .. autoattribute:: nphi
 
     .. rubric:: Boundary conditions
-       :heading-level: 3
+        :heading-level: 3
 
     .. autoattribute:: fbeam
     .. autoattribute:: umu0
@@ -43,3 +42,38 @@
     .. autoattribute:: btemp
     .. autoattribute:: ttemp
     .. autoattribute:: temis
+
+
+    .. rubric:: Other scalar parameters
+        :heading-level: 3
+
+    .. autoattribute:: accur
+    .. autoattribute:: wvnmlo
+    .. autoattribute:: wvnmhi
+
+    .. rubric:: Optical property arrays
+        :heading-level: 3
+
+    .. autoattribute:: dtauc
+    .. autoattribute:: ssalb
+    .. autoattribute:: pmom
+
+    .. rubric:: Geometry arrays
+        :heading-level: 3
+
+    .. autoattribute:: umu
+    .. autoattribute:: phi
+    .. autoattribute:: utau
+    .. autoattribute:: temper
+
+    .. rubric:: Output arrays (read-only)
+        :heading-level: 3
+
+    .. autoattribute:: rfldir
+    .. autoattribute:: rfldn
+    .. autoattribute:: flup
+    .. autoattribute:: dfdt
+    .. autoattribute:: uavg
+    .. autoattribute:: uavgdn
+    .. autoattribute:: uavgup
+    .. autoattribute:: uavgso
