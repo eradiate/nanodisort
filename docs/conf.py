@@ -20,6 +20,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
+    "nbsphinx",
 ]
 
 # Napoleon settings (for Numpydoc)
