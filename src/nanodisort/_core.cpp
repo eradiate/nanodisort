@@ -64,8 +64,8 @@ extern "C" void cdisort_error_handler(const char* message) {
         return nb::ndarray<nb::numpy, double, nb::ndim<1>>(member, 1, shape); \
     }
 
-// Output array property (read-only, creates owned copy)
-#define DEFINE_OUTPUT_PROPERTY(name, field) \
+// Output array properties for radiant quantities (stored in out.rad[].field)
+#define DEFINE_OUTPUT_RADIANT(name, field) \
     auto get_##name() { \
         check_allocated(); \
         if (!out.rad) { \
@@ -80,6 +80,59 @@ extern "C" void cdisort_error_handler(const char* message) {
             delete[] static_cast<double*>(p); \
         }); \
         return nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner); \
+    }
+
+// Generic output array property for multidimensional arrays
+#define DEFINE_OUTPUT_ARRAY_1D(name, ptr, size_expr, err_msg) \
+    auto get_##name() { \
+        check_allocated(); \
+        if (!out.ptr) { \
+            throw std::runtime_error(err_msg); \
+        } \
+        int total_size = size_expr; \
+        double* data = new double[total_size]; \
+        std::copy_n(out.ptr, total_size, data); \
+        size_t shape[1] = {static_cast<size_t>(total_size)}; \
+        nb::capsule owner(data, [](void *p) noexcept { \
+            delete[] static_cast<double*>(p); \
+        }); \
+        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner); \
+    }
+
+#define DEFINE_OUTPUT_ARRAY_2D(name, ptr, dim1, dim2, err_msg) \
+    auto get_##name() { \
+        check_allocated(); \
+        if (!out.ptr) { \
+            throw std::runtime_error(err_msg); \
+        } \
+        int total_size = (dim1) * (dim2); \
+        double* data = new double[total_size]; \
+        std::copy_n(out.ptr, total_size, data); \
+        size_t shape[2] = {static_cast<size_t>(dim1), static_cast<size_t>(dim2)}; \
+        nb::capsule owner(data, [](void *p) noexcept { \
+            delete[] static_cast<double*>(p); \
+        }); \
+        return nb::ndarray<nb::numpy, double, nb::ndim<2>>(data, 2, shape, owner); \
+    }
+
+#define DEFINE_OUTPUT_ARRAY_3D(name, ptr, dim1, dim2, dim3, err_msg) \
+    auto get_##name() { \
+        check_allocated(); \
+        if (!out.ptr) { \
+            throw std::runtime_error(err_msg); \
+        } \
+        int total_size = (dim1) * (dim2) * (dim3); \
+        double* data = new double[total_size]; \
+        std::copy_n(out.ptr, total_size, data); \
+        size_t shape[3] = { \
+            static_cast<size_t>(dim1), \
+            static_cast<size_t>(dim2), \
+            static_cast<size_t>(dim3) \
+        }; \
+        nb::capsule owner(data, [](void *p) noexcept { \
+            delete[] static_cast<double*>(p); \
+        }); \
+        return nb::ndarray<nb::numpy, double, nb::ndim<3>>(data, 3, shape, owner); \
     }
 
 // Nanobind property binding macros
@@ -224,14 +277,26 @@ public:
     DEFINE_ARRAY_PROPERTY(temper, ds.temper, ds.nlyr + 1)
 
     // Output accessors (read-only) - create copies owned by Python
-    DEFINE_OUTPUT_PROPERTY(rfldir, rfldir)
-    DEFINE_OUTPUT_PROPERTY(rfldn, rfldn)
-    DEFINE_OUTPUT_PROPERTY(flup, flup)
-    DEFINE_OUTPUT_PROPERTY(dfdt, dfdt)
-    DEFINE_OUTPUT_PROPERTY(uavg, uavg)
-    DEFINE_OUTPUT_PROPERTY(uavgdn, uavgdn)
-    DEFINE_OUTPUT_PROPERTY(uavgup, uavgup)
-    DEFINE_OUTPUT_PROPERTY(uavgso, uavgso)
+    DEFINE_OUTPUT_RADIANT(rfldir, rfldir)
+    DEFINE_OUTPUT_RADIANT(rfldn, rfldn)
+    DEFINE_OUTPUT_RADIANT(flup, flup)
+    DEFINE_OUTPUT_RADIANT(dfdt, dfdt)
+    DEFINE_OUTPUT_RADIANT(uavg, uavg)
+    DEFINE_OUTPUT_RADIANT(uavgdn, uavgdn)
+    DEFINE_OUTPUT_RADIANT(uavgup, uavgup)
+    DEFINE_OUTPUT_RADIANT(uavgso, uavgso)
+
+    // Intensity and special boundary condition outputs
+    DEFINE_OUTPUT_ARRAY_3D(uu, uu, ds.numu, ds.ntau, ds.nphi,
+        "Intensity output not available. Ensure usrang=True, onlyfl=False, and run solve() first.")
+    DEFINE_OUTPUT_ARRAY_2D(u0u, u0u, ds.numu, ds.ntau,
+        "U0U output not available. Ensure usrang=True, onlyfl=False, and run solve() first.")
+    DEFINE_OUTPUT_ARRAY_3D(uum, uum, ds.numu, ds.ntau, ds.nphi,
+        "UUM output not available. Ensure output_uum=True and run solve() first.")
+    DEFINE_OUTPUT_ARRAY_1D(albmed, albmed, ds.numu,
+        "Albedo not available (only for ibcnd=SPECIAL_BC).")
+    DEFINE_OUTPUT_ARRAY_1D(trnmed, trnmed, ds.numu,
+        "Transmissivity not available (only for ibcnd=SPECIAL_BC).")
 
     /*
      * String representation showing key dimensions and allocation status
@@ -339,5 +404,12 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RO(uavg, "Mean intensity including direct beam [ntau].")
         BIND_PROPERTY_RO(uavgdn, "Mean diffuse downward intensity [ntau].")
         BIND_PROPERTY_RO(uavgup, "Mean diffuse upward intensity [ntau].")
-        BIND_PROPERTY_RO(uavgso, "Mean direct solar intensity [ntau].");
+        BIND_PROPERTY_RO(uavgso, "Mean direct solar intensity [ntau].")
+        // Intensity outputs (require usrang=True, onlyfl=False)
+        BIND_PROPERTY_RO(uu, "Intensity at user angles [numu, ntau, nphi].")
+        BIND_PROPERTY_RO(u0u, "Azimuthally averaged intensity [numu, ntau].")
+        BIND_PROPERTY_RO(uum, "Intensity (corrected) at user angles [numu, ntau, nphi].")
+        // Special boundary condition outputs (require ibcnd=SPECIAL_BC)
+        BIND_PROPERTY_RO(albmed, "Albedo of medium [numu].")
+        BIND_PROPERTY_RO(trnmed, "Transmissivity of medium [numu].");
 }
