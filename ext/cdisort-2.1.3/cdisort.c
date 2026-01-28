@@ -11543,7 +11543,7 @@ double *c_dbl_vector(int  nl,
 
   if (nh < nl) {
     fprintf(stderr,"\n\n**error:%s, variable %s, range (%d,%d)\n","dbl_vector",name,nl,nh);
-    exit(1);
+    c_errmsg("alloc error", DS_ERROR);
   }
 
   nl_safe  = (nl < 0) ? nl : 0;
