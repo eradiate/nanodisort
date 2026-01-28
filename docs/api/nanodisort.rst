@@ -66,7 +66,7 @@
     .. autoattribute:: utau
     .. autoattribute:: temper
 
-    .. rubric:: Output arrays (read-only)
+    .. rubric:: Output arrays (read-only, always present)
         :heading-level: 3
 
     .. autoattribute:: rfldir
@@ -77,3 +77,16 @@
     .. autoattribute:: uavgdn
     .. autoattribute:: uavgup
     .. autoattribute:: uavgso
+
+    .. rubric:: Output arrays (read-only, intensity)
+        :heading-level: 3
+
+    .. autoattribute:: uu
+    .. autoattribute:: u0u
+    .. autoattribute:: uum
+
+    .. rubric:: Output arrays (read-only, special boundary condition)
+        :heading-level: 3
+
+    .. autoattribute:: albmed
+    .. autoattribute:: trnmed
