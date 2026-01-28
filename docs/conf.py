@@ -74,3 +74,6 @@ autodoc_default_options = {
 autodoc_class_signature = "separated"
 autodoc_member_order = "bysource"
 autodoc_typehints_format = "short"
+
+# nbsphinx options
+nbsphinx_execute = "never"  # TODO:

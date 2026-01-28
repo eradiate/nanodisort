@@ -103,5 +103,6 @@ nanodisort is licensed under the GNU General Public License v3.0 or later
     :maxdepth: 2
     :hidden:
 
+    examples/getting_started.ipynb
     api/index
     references

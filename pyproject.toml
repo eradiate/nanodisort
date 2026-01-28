@@ -23,7 +23,7 @@ classifiers = [
 
 [dependency-groups]
 docs = [
-  "sphinx>=7.0",
+  "sphinx>=7.0,<9.0",
   "shibuya>=2024.0",
   "sphinx-autobuild>=2024.0",
   "sphinxcontrib-bibtex>=2.6.0",
