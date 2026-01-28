@@ -67,13 +67,19 @@ Why another Python DISORT wrapper?
 This project fills a specific niche that was not addressed by existing Python-centric DISORT implementations or wrappers. Hereafter follows a non-exhaustive review of existing solutions and how nanodisort relates to them.
 
 Fortran and C DISORT implementations
-    This Fortran implementation :cite:p:`Stamnes1988DISORT` has issues that were solved later by CDISORT. The CDISORT paper :cite:p:`Buras2011CDISORTCorrection` motivates the CDISORT project and explains why we decided to wrap CDISORT rather than DISORT.
+    This Fortran implementation :cite:p:`Stamnes1988DISORT,Stamnes2000DISORTReport` has issues that were solved later by CDISORT. The CDISORT paper :cite:p:`Buras2011CDISORTCorrection` motivates the CDISORT project and explains why we decided to wrap CDISORT rather than DISORT.
 
 `pydisort <https://github.com/zoeyzyhu/pydisort>`__
     This project wraps CDISORT as well, with `pybind11 <https://github.com/pybind/pybind11>`__. Its goals differ from this project's in that nandisort has more modest ambitions: we do not aim to expose a specific C++ interface to CDISORT, and we do not seek integration with ML frameworks.
 
 `Pythonic-DISORT <https://github.com/LDEO-CREW/Pythonic-DISORT>`__
     This project is very different from nanodisort: it is a reimplementation of the original DISORT algorithm in Python. It uses Numpy and vectorizes many performance-critical operations, which makes it a serious alternative to consider for people who want to use the original DISORT in Python. It also provides a comprehensive introduction to DISORT.
+
+`pyDISORT <https://github.com/mjwolff/pyDISORT>`__
+    *TBD*
+
+`pyRT_DISORT <https://github.com/mjwolff/pyRT_DISORT>`__
+    *TBD*
 
 Knowing that, the following major goals we set and choices we made for nanodisort are:
 
