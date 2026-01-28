@@ -10,3 +10,4 @@ docs/_build/
 wheels/
 .vscode/
 .idea/
+.ipynb_checkpoints/
