@@ -225,6 +225,7 @@ public:
     DEFINE_FLAG_PROPERTY(onlyfl, ds.flag.onlyfl)
     DEFINE_FLAG_PROPERTY(quiet, ds.flag.quiet)
     DEFINE_FLAG_PROPERTY(intensity_correction, ds.flag.intensity_correction)
+    DEFINE_FLAG_PROPERTY(old_intensity_correction, ds.flag.old_intensity_correction)
     DEFINE_FLAG_PROPERTY(spher, ds.flag.spher)
 
     // Boundary conditions
@@ -372,6 +373,7 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(onlyfl, "Return only fluxes (not intensities).")
         BIND_PROPERTY_RW(quiet, "Suppress output messages.")
         BIND_PROPERTY_RW(intensity_correction, "Apply intensity correction.")
+        BIND_PROPERTY_RW(old_intensity_correction, "Apply old-style intensity correction (may be required for some tests).")
         BIND_PROPERTY_RW(spher, "Pseudo-spherical geometry (vs plane-parallel).")
         // Boundary conditions
         BIND_PROPERTY_RW(fbeam, "Intensity of incident parallel beam.")
