@@ -94,6 +94,11 @@ class DisortState(_DisortState):
     uavgdn: NDArray[np.float64]
     uavgup: NDArray[np.float64]
     uavgso: NDArray[np.float64]
+    uu: NDArray[np.float64]
+    u0u: NDArray[np.float64]
+    uum: NDArray[np.float64]
+    albmed: NDArray[np.float64]
+    trnmed: NDArray[np.float64]
     old_intensity_correction: bool
 
     def __init__(self) -> None:
