@@ -21,7 +21,8 @@ using namespace nb::literals;
 
 // Type aliases for numpy arrays
 using ArrayD1 = nb::ndarray<double, nb::ndim<1>, nb::c_contig, nb::device::cpu>;
-using ArrayD2 = nb::ndarray<double, nb::ndim<2>, nb::c_contig, nb::device::cpu>;
+// Fortran-contiguous 2D arrays (cdisort uses column-major order internally)
+using ArrayD2F = nb::ndarray<double, nb::ndim<2>, nb::f_contig, nb::device::cpu>;
 
 /*
  * Error handling for cdisort
@@ -64,9 +65,18 @@ extern "C" void cdisort_error_handler(const char* message) {
         return nb::ndarray<nb::numpy, double, nb::ndim<1>>(member, 1, shape); \
     }
 
+// Helper to make a numpy array read-only via setflags(write=False)
+template<typename T>
+nb::object make_readonly(T&& arr) {
+    nb::object obj = nb::cast(std::forward<T>(arr));
+    obj.attr("setflags")("write"_a = false);
+    return obj;
+}
+
 // Output array properties for radiant quantities (stored in out.rad[].field)
+// Returns a read-only copy.
 #define DEFINE_OUTPUT_RADIANT(name, field) \
-    auto get_##name() { \
+    nb::object get_##name() { \
         check_allocated(); \
         if (!out.rad) { \
             throw std::runtime_error("Output not available. Run solve() first."); \
@@ -79,12 +89,12 @@ extern "C" void cdisort_error_handler(const char* message) {
         nb::capsule owner(data, [](void *p) noexcept { \
             delete[] static_cast<double*>(p); \
         }); \
-        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner); \
+        return make_readonly(nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner)); \
     }
 
-// Generic output array property for multidimensional arrays
+// Generic output array property for 1D arrays. Returns a read-only copy.
 #define DEFINE_OUTPUT_ARRAY_1D(name, ptr, size_expr, err_msg) \
-    auto get_##name() { \
+    nb::object get_##name() { \
         check_allocated(); \
         if (!out.ptr) { \
             throw std::runtime_error(err_msg); \
@@ -96,43 +106,49 @@ extern "C" void cdisort_error_handler(const char* message) {
         nb::capsule owner(data, [](void *p) noexcept { \
             delete[] static_cast<double*>(p); \
         }); \
-        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner); \
+        return make_readonly(nb::ndarray<nb::numpy, double, nb::ndim<1>>(data, 1, shape, owner)); \
     }
 
+// Note: cdisort stores 2D arrays in Fortran (column-major) order.
+// We return a read-only view with Fortran strides; caller must keep DisortState alive.
 #define DEFINE_OUTPUT_ARRAY_2D(name, ptr, dim1, dim2, err_msg) \
-    auto get_##name() { \
+    nb::object get_##name() { \
         check_allocated(); \
         if (!out.ptr) { \
             throw std::runtime_error(err_msg); \
         } \
-        int total_size = (dim1) * (dim2); \
-        double* data = new double[total_size]; \
-        std::copy_n(out.ptr, total_size, data); \
-        size_t shape[2] = {static_cast<size_t>(dim1), static_cast<size_t>(dim2)}; \
-        nb::capsule owner(data, [](void *p) noexcept { \
-            delete[] static_cast<double*>(p); \
-        }); \
-        return nb::ndarray<nb::numpy, double, nb::ndim<2>>(data, 2, shape, owner); \
+        int d1 = dim1, d2 = dim2; \
+        size_t shape[2] = {static_cast<size_t>(d1), static_cast<size_t>(d2)}; \
+        /* Fortran strides in elements */ \
+        int64_t strides[2] = {1, static_cast<int64_t>(d1)}; \
+        return make_readonly(nb::ndarray<nb::numpy, double, nb::ndim<2>>( \
+            out.ptr, 2, shape, nb::handle(), strides \
+        )); \
     }
 
+// Note: cdisort stores multidimensional arrays in Fortran (column-major) order.
+// We return a read-only view with Fortran strides; caller must keep DisortState alive.
 #define DEFINE_OUTPUT_ARRAY_3D(name, ptr, dim1, dim2, dim3, err_msg) \
-    auto get_##name() { \
+    nb::object get_##name() { \
         check_allocated(); \
         if (!out.ptr) { \
             throw std::runtime_error(err_msg); \
         } \
-        int total_size = (dim1) * (dim2) * (dim3); \
-        double* data = new double[total_size]; \
-        std::copy_n(out.ptr, total_size, data); \
+        int d1 = dim1, d2 = dim2, d3 = dim3; \
         size_t shape[3] = { \
-            static_cast<size_t>(dim1), \
-            static_cast<size_t>(dim2), \
-            static_cast<size_t>(dim3) \
+            static_cast<size_t>(d1), \
+            static_cast<size_t>(d2), \
+            static_cast<size_t>(d3) \
         }; \
-        nb::capsule owner(data, [](void *p) noexcept { \
-            delete[] static_cast<double*>(p); \
-        }); \
-        return nb::ndarray<nb::numpy, double, nb::ndim<3>>(data, 3, shape, owner); \
+        /* Fortran strides in elements */ \
+        int64_t strides[3] = { \
+            1, \
+            static_cast<int64_t>(d1), \
+            static_cast<int64_t>(d1 * d2) \
+        }; \
+        return make_readonly(nb::ndarray<nb::numpy, double, nb::ndim<3>>( \
+            out.ptr, 3, shape, nb::handle(), strides \
+        )); \
     }
 
 // Nanobind property binding macros
@@ -248,27 +264,37 @@ public:
     DEFINE_ARRAY_PROPERTY(dtauc, ds.dtauc, ds.nlyr)
     DEFINE_ARRAY_PROPERTY(ssalb, ds.ssalb, ds.nlyr)
 
-    void set_pmom(ArrayD2 arr) {
+    // Accept Fortran-contiguous arrays; nanobind converts C-order inputs automatically
+    void set_pmom(ArrayD2F arr) {
         check_allocated();
-        int expected_size = (ds.nmom_nstr + 1) * ds.nlyr;
-        if (arr.shape(0) != ds.nmom_nstr + 1 || arr.shape(1) != ds.nlyr) {
+        int d1 = ds.nmom_nstr + 1;
+        int d2 = ds.nlyr;
+        if (arr.shape(0) != d1 || arr.shape(1) != d2) {
             throw std::runtime_error(
                 "pmom array shape mismatch. Expected ("
-                + std::to_string(ds.nmom_nstr + 1) + ", "
-                + std::to_string(ds.nlyr) + ")"
+                + std::to_string(d1) + ", "
+                + std::to_string(d2) + ")"
             );
         }
-        std::copy_n(arr.data(), expected_size, ds.pmom);
+        // Direct copy — nanobind ensures arr is Fortran-contiguous
+        std::copy_n(arr.data(), d1 * d2, ds.pmom);
     }
 
+    // Return a view on cdisort's buffer with Fortran strides (no copy)
     auto get_pmom() {
         check_allocated();
         size_t shape[2] = {
             static_cast<size_t>(ds.nmom_nstr + 1),
             static_cast<size_t>(ds.nlyr)
         };
+        // Fortran strides in elements (nanobind converts to bytes internally)
+        int64_t strides[2] = {
+            1,                              // dim 0: 1 element
+            static_cast<int64_t>(ds.nmom_nstr + 1)  // dim 1: nmom_nstr+1 elements
+        };
+        // Return a non-owning view; caller must keep DisortState alive
         return nb::ndarray<nb::numpy, double, nb::ndim<2>>(
-            ds.pmom, 2, shape
+            ds.pmom, 2, shape, nb::handle(), strides
         );
     }
 
