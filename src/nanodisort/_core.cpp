@@ -393,7 +393,7 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(dtauc, "Optical depths of computational layers [nlyr].")
         BIND_PROPERTY_RW(ssalb, "Single-scattering albedo of computational layers [nlyr].")
         BIND_PROPERTY_RW(pmom, "Phase function moments [nmom_nstr+1, nlyr].")
-        // Geometry arrays
+        // Other input arrays
         BIND_PROPERTY_RW(umu, "Polar angle cosines [numu].")
         BIND_PROPERTY_RW(phi, "Azimuthal angles [degrees] [nphi].")
         BIND_PROPERTY_RW(utau, "User optical depths [ntau].")

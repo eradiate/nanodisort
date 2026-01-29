@@ -19,6 +19,8 @@
     .. autoattribute:: spher
     .. autoattribute:: onlyfl
     .. autoattribute:: quiet
+    .. autoattribute:: intensity_correction
+    .. autoattribute:: old_intensity_correction
 
     .. rubric:: Dimensions
         :heading-level: 3
@@ -58,7 +60,7 @@
     .. autoattribute:: ssalb
     .. autoattribute:: pmom
 
-    .. rubric:: Geometry arrays
+    .. rubric:: Other input arrays
         :heading-level: 3
 
     .. autoattribute:: umu
