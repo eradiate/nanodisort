@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find Python and nanobind
 find_package(Python 3.9 REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(nanobind CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 # cdisort library sources
 set(CDISORT_SOURCES
@@ -32,12 +33,16 @@ target_link_libraries(cdisort PUBLIC m)  # Link math library
 # Python extension module using nanobind
 nanobind_add_module(_core
     src/nanodisort/_core.cpp
+    src/nanodisort/thread_pool.cpp
     NB_STATIC  # Use static linking with nanobind
 )
 
 # Link cdisort library to Python extension
-target_link_libraries(_core PRIVATE cdisort)
-target_include_directories(_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/cdisort-2.1.3)
+target_link_libraries(_core PRIVATE cdisort Threads::Threads)
+target_include_directories(_core PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/cdisort-2.1.3
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/nanodisort
+)
 
 # Install the extension module
 install(TARGETS _core LIBRARY DESTINATION nanodisort COMPONENT python)

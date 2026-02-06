@@ -25,6 +25,7 @@ import itertools
 import numpy as np
 from numpy.typing import NDArray
 
+from nanodisort._core import BatchSolver as _BatchSolver
 from nanodisort._core import DisortState as _DisortState
 
 from ._version import _version as __version__
@@ -189,4 +190,105 @@ class DisortState(_DisortState):
         print("\n".join(["DisortState[", body, "]"]))
 
 
-__all__ = ["__version__", "DisortState"]
+class BatchSolver(_BatchSolver):
+    """
+    Parallel batch DISORT solver.
+
+    Solves multiple independent spectral problems in parallel using a C++
+    thread pool. Shared geometry and control flags are configured once on
+    the solver instance; spectrally-varying optical properties (optical
+    depths, single-scattering albedos, phase function moments, beam
+    intensities, surface albedos) are provided as arrays with a leading
+    batch dimension.
+
+    Thread safety requires ``quiet=True`` and ``lamber=True``. These are
+    enforced at allocation time.
+
+    Parameters
+    ----------
+    nthreads : int, optional
+        Number of worker threads. Defaults to the hardware concurrency.
+
+    Examples
+    --------
+    >>> import nanodisort as nd
+    >>> import numpy as np
+    >>> solver = nd.BatchSolver(nthreads=4)
+    >>> solver.nstr = 8
+    >>> solver.nlyr = 1
+    >>> solver.nmom = 8
+    >>> solver.ntau = 2
+    >>> solver.usrtau = True
+    >>> solver.usrang = False
+    >>> solver.lamber = True
+    >>> solver.onlyfl = True
+    >>> solver.quiet = True
+    >>> solver.umu0 = 1.0
+    >>> solver.phi0 = 0.0
+    >>> solver.set_utau(np.array([0.0, 1.0]))
+    >>> nbatch = 10
+    >>> solver.allocate(nbatch)
+    >>> solver.set_dtauc(np.ones((nbatch, 1)))
+    >>> solver.set_ssalb(np.full((nbatch, 1), 0.9))
+    >>> pmom = np.zeros((9, 1, nbatch), order="F")
+    >>> pmom[0, :, :] = 1.0
+    >>> solver.set_pmom(pmom)
+    >>> solver.set_fbeam(np.full(nbatch, np.pi))
+    >>> solver.set_albedo(np.zeros(nbatch))
+    >>> solver.solve()
+    >>> rfldir = solver.rfldir  # shape (nbatch, 2)
+    """
+
+    # Type annotations for properties
+    nbatch: int
+    nthreads: int
+    allocated: bool
+    solved: bool
+    nstr: int
+    nlyr: int
+    nmom: int
+    ntau: int
+    numu: int
+    nphi: int
+    usrtau: bool
+    usrang: bool
+    lamber: bool
+    planck: bool
+    onlyfl: bool
+    quiet: bool
+    intensity_correction: bool
+    old_intensity_correction: bool
+    spher: bool
+    umu0: float
+    phi0: float
+    fisot: float
+    fluor: float
+    btemp: float
+    ttemp: float
+    temis: float
+    accur: float
+    wvnmlo: float
+    wvnmhi: float
+    rfldir: NDArray[np.float64]
+    rfldn: NDArray[np.float64]
+    flup: NDArray[np.float64]
+    dfdt: NDArray[np.float64]
+    uavg: NDArray[np.float64]
+    uavgdn: NDArray[np.float64]
+    uavgup: NDArray[np.float64]
+    uavgso: NDArray[np.float64]
+    uu: NDArray[np.float64]
+
+    def __init__(self, nthreads: int = 0) -> None:
+        """
+        Initialize the batch solver.
+
+        Parameters
+        ----------
+        nthreads : int, optional
+            Number of worker threads. 0 (default) uses hardware concurrency.
+        """
+        super().__init__(nthreads)
+
+
+__all__ = ["__version__", "BatchSolver", "DisortState"]
