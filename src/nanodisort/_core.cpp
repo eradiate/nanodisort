@@ -272,7 +272,7 @@ public:
     DEFINE_ARRAY_PROPERTY(dtauc, ds.dtauc, ds.nlyr)
     DEFINE_ARRAY_PROPERTY(ssalb, ds.ssalb, ds.nlyr)
 
-    // Accept Fortran-contiguous arrays; nanobind converts C-order inputs automatically
+    // Accepts any contiguous array; nanobind converts to Fortran order if needed
     void set_pmom(ArrayD2F arr) {
         check_allocated();
         int d1 = ds.nmom_nstr + 1;
@@ -590,8 +590,8 @@ public:
             std::copy_n(arr.data() + i * proto.nlyr, proto.nlyr, states_[i].ssalb);
     }
 
-    // pmom: (nbatch, nmom_nstr+1, nlyr), C-contiguous input
-    // cdisort stores pmom in Fortran order (nmom_nstr+1, nlyr)
+    // pmom: (nmom_nstr+1, nlyr, nbatch)
+    // Accepts any contiguous array; nanobind converts to Fortran order if needed
     void set_pmom(ArrayD3F arr) {
         check_allocated();
         int d1 = proto.nmom_nstr + 1;

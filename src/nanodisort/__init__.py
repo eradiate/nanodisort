@@ -230,7 +230,7 @@ class BatchSolver(_BatchSolver):
     >>> solver.allocate(nbatch)
     >>> solver.set_dtauc(np.ones((nbatch, 1)))
     >>> solver.set_ssalb(np.full((nbatch, 1), 0.9))
-    >>> pmom = np.zeros((9, 1, nbatch), order="F")
+    >>> pmom = np.zeros((9, 1, nbatch))
     >>> pmom[0, :, :] = 1.0
     >>> solver.set_pmom(pmom)
     >>> solver.set_fbeam(np.full(nbatch, np.pi))
