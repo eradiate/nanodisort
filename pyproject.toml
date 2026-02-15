@@ -29,17 +29,19 @@ docs = [
   "sphinxcontrib-bibtex>=2.6.0",
 ]
 build = ["nanobind>=2.9.0", "scikit-build-core>=0.11.0"]
+test = ["pytest>=7.0", "pytest-cov>=4.0"]
+benchmark = ["pytest-benchmark"]
 dev = [
   "ipykernel>=6.31.0",
   "jupyterlab",
   "nanobind>=2.9.2",
   "nbsphinx>=0.9.0",
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
   "ruff>=0.1.0",
   "taskipy>=1.12.0",
   { include-group = "build" },
   { include-group = "docs" },
+  { include-group = "test" },
+  { include-group = "benchmark" },
 ]
 
 [build-system]
@@ -62,7 +64,14 @@ no-build-isolation-package = ["nanodisort"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+  "--showlocals",
+  "--tb=short",
+  "-p no:benchmark",
+]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
@@ -96,6 +105,7 @@ lint = "ruff check src tests"
 format = "ruff format src tests"
 format-check = "ruff format --check src tests"
 check = "ruff check src tests && ruff format --check src tests"
+benchmark = { cmd = "pytest benchmarks", cwd = "." }
 
 # Build tasks
 build = "uv build"
