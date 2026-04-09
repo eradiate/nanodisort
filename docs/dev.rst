@@ -36,6 +36,11 @@ Run tests
 
         uv run task test
 
+Run benchmarks
+    .. code-block:: bash
+
+        uv run task benchmark
+
 Run linting
     .. code-block:: bash
 
