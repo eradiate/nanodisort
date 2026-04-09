@@ -1,6 +1,6 @@
 [project]
 name = "nanodisort"
-version = "0.1.0"
+version = "0.1.0.dev1"
 description = "Python bindings for cdisort radiative transfer solver"
 readme = "README.md"
 authors = [{ name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }]
@@ -37,6 +37,7 @@ dev = [
   "nanobind>=2.9.2",
   "nbsphinx>=0.9.0",
   "ruff>=0.1.0",
+  "sphinx-copybutton>=0.5.2",
   "taskipy>=1.12.0",
   { include-group = "build" },
   { include-group = "docs" },

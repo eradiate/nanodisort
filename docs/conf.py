@@ -19,6 +19,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
+    "sphinx_copybutton",
     "nbsphinx",
 ]
 
