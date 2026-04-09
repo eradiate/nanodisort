@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Rayference
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 cmake_minimum_required(VERSION 3.15...3.27)
 project(nanodisort VERSION 0.1.0 LANGUAGES C CXX)
 

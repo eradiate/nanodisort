@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Rayference
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 This module provides functions to generate Legendre expansion coefficients
 for various phase functions, matching cdisort's ``c_getmom()`` function.

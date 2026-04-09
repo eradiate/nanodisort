@@ -1,8 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Rayference
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /*
- * nanodisort - Python bindings for cdisort
- *
- * Copyright (c) 2025 Rayference
- * Licensed under GPL-3.0-or-later
+ * nanodisort - Python bindings for CDISORT
  */
 
 #include <nanobind/nanobind.h>

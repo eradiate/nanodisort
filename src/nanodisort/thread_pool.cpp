@@ -1,8 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Rayference
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /*
  * nanodisort - Thread pool for parallel batch solving
- *
- * Copyright (c) 2025 Rayference
- * Licensed under GPL-3.0-or-later
  */
 
 #include "thread_pool.h"
