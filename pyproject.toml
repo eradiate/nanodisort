@@ -89,6 +89,16 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.cibuildwheel]
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip = ["pp*", "*-musllinux_*"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+
+[tool.cibuildwheel.macos]
+archs = ["native"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
