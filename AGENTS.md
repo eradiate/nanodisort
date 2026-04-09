@@ -43,13 +43,16 @@ uv run task docs
 ## Architecture
 
 ### Directory Structure
+
 - `src/nanodisort/` - Python package with C++ bindings
 - `src/nanodisort/_core.cpp` - nanobind C++ extension wrapping cdisort
 - `src/nanodisort/utils/phase_functions.py` - Phase function moment generators
 - `ext/cdisort-2.1.3/` - Vendored cdisort C library
 - `tests/` - pytest test suite
+- `benchmarks/` - pytest-benchmark suite
 
 ### Build System
+
 - scikit-build-core for Python/CMake integration
 - nanobind for C++17/Python bindings
 - CMake builds cdisort as a static library, then links to the `_core` extension
@@ -57,6 +60,7 @@ uv run task docs
 ### Core Components
 
 **DisortState** (`__init__.py` wraps `_core.cpp`): Main solver interface
+
 - Configure dimensions: `nstr`, `nlyr`, `nmom`, `ntau`, `numu`, `nphi`
 - Set flags: `usrtau`, `usrang`, `lamber`, `planck`, `onlyfl`, `quiet`, `intensity_correction`, `spher`
 - Set boundary conditions: `fbeam`, `umu0`, `phi0`, `fisot`, `albedo`, etc.
@@ -65,17 +69,21 @@ uv run task docs
 - Read outputs: `rfldir`, `rfldn`, `flup`, `dfdt`, `uu` (intensity), etc.
 
 **Phase Functions** (`utils/phase_functions.py`): Generate Legendre moment arrays
+
 - `isotropic(nmom)`, `rayleigh(nmom)`, `henyey_greenstein(gg, nmom)`
 - `haze_l(nmom)`, `cloud_c1(nmom)` - tabulated aerosol/cloud phase functions
 
 ### Array Conventions
+
 - C++ bindings handle Fortran-to-C array order conversion automatically
 - `pmom` array shape: `(nmom_nstr+1, nlyr)` in C order
 - `uu` intensity output shape: `(numu, ntau, nphi)` in C order
 
 ### Testing
+
 - `test_disotest.py` - Ported tests from cdisort's disotest.c, validated against Van de Hulst, Sweigart, Garcia-Siewert benchmarks
 - `test_core.py` - Basic solver functionality
+- `test_batch.py` - Batch solve tests
 - `test_error_handling.py` - Error condition tests
 
 ## Key Implementation Details
