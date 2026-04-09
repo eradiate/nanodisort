@@ -1,7 +1,7 @@
 nanodisort documentation
 ========================
 
-**nanodisort** provides Python bindings for cdisort, a C implementation of the
+**nanodisort** provides Python bindings for CDISORT, a C implementation of the
 DISORT (Discrete Ordinates Radiative Transfer) program for solving the
 radiative transfer equation.
 
@@ -18,7 +18,7 @@ transfer equation, handling:
 - Thermal emission (Planck function)
 - Pseudo-spherical geometry for the direct beam
 
-The cdisort library is a C translation of the original Fortran DISORT code,
+The CDISORT library is a C translation of the original Fortran DISORT code,
 offering improved performance through dynamic memory allocation and full
 double precision arithmetic.
 
@@ -34,7 +34,7 @@ From source:
     uv sync --extra dev
     uv pip install -e .
 
-Quick Start
+Quickstart
 -----------
 
 .. code-block:: python
@@ -76,28 +76,48 @@ Fortran and C DISORT implementations
     This project is very different from nanodisort: it is a reimplementation of the original DISORT algorithm in Python. It uses Numpy and vectorizes many performance-critical operations, which makes it a serious alternative to consider for people who want to use the original DISORT in Python. It also provides a comprehensive introduction to DISORT.
 
 `pyDISORT <https://github.com/mjwolff/pyDISORT>`__
-    *TBD*
+    This project wraps the Fortran implementation of DISORT (with minimal changes) at a low level and is, in its philosophy, similar to nanodisort.
 
 `pyRT_DISORT <https://github.com/mjwolff/pyRT_DISORT>`__
-    *TBD*
+    This package assists pyDISORT users in the creation of their input and does not provide radiative transfer simulation features directly.
 
 Knowing that, the following major goals we set and choices we made for nanodisort are:
 
 * A **thin Python wrapper around CDISORT**: there is no intermediate C++ API.
 * An API that is **as close to the CDISORT API as possible**: no hidden operations, only error handling has been modified to allow raising exceptions instead of terminating execution.
-* Full **interoperability with Numpy buffers**: all input data arrays can be assigned Numpy data.
+* Full **interoperability with Numpy buffers**: all input data arrays can be assigned NumPy data.
 * **Lightweight**: no required dependency on large computational frameworks (e.g. PyTorch, JAX or TensorFlow).
+
+Acknowledgments
+---------------
+
+nanodisort authors are grateful to the developers of the many implementations of DISORT, and, in particular, to
+
+- Timothy E. Dowling (original CDISORT C translation);
+- Robert Buras (phase function extensions);
+- Arve Kylling (pseudo-spherical approximation, testing);
+- the original DISORT Fortran authors.
 
 Citation
 --------
 
-If you use nanodisort in your research, please cite the cdisort paper :cite:p:`Buras2011CDISORTCorrection` and the nanodisort repository.
+If you use nanodisort in your research, please cite the CDISORT paper :cite:p:`Buras2011CDISORTCorrection` and the nanodisort repository:
+
+.. code:: bibtex
+
+    @software{Leroy_nanodisort,
+        author = {Leroy, Vincent and Emde, Claudia},
+        license = {GPL-3.0-or-later},
+        title = {{nanodisort}},
+        url = {https://github.com/eradiate/nanodisort},
+        version = {0.1.0}
+    }
 
 License
 -------
 
 nanodisort is licensed under the GNU General Public License v3.0 or later
-(GPL-3.0-or-later), consistent with the cdisort library it wraps.
+(GPL-3.0-or-later), consistent with the CDISORT library it wraps.
 
 .. toctree::
     :maxdepth: 2
@@ -105,4 +125,5 @@ nanodisort is licensed under the GNU General Public License v3.0 or later
 
     examples/getting_started.ipynb
     api/index
+    dev
     references

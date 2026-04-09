@@ -1,6 +1,6 @@
 # nanodisort
 
-Python bindings for [cdisort](http://www.libradtran.org/doku.php?id=cdisort), a C implementation of the DISORT (Discrete Ordinates Radiative Transfer) solver.
+Python bindings for [CDISORT](http://www.libradtran.org/doku.php?id=cdisort), a C implementation of the DISORT (Discrete Ordinates Radiative Transfer) solver.
 
 ## Overview
 
@@ -12,16 +12,14 @@ DISORT is a widely-used radiative transfer solver for plane-parallel atmospheres
 - Various boundary conditions
 - Pseudo-spherical geometry for direct beam
 
-The cdisort library offers improved performance over the original Fortran version through dynamic memory allocation and full double precision arithmetic.
+The CDISORT library offers improved performance over the original Fortran version through dynamic memory allocation and full double precision arithmetic.
 
 ## Installation
 
 ### Prerequisites
 
-- Python 3.9 or later
-- C compiler (gcc, clang, or MSVC)
-- CMake 3.15 or later
-- [uv](https://github.com/astral-sh/uv) (recommended)
+- Python 3.9 to 3.13
+- NumPy 1.20 or later
 
 ### From source
 
@@ -32,7 +30,7 @@ uv sync --dev
 uv pip install -e .
 ```
 
-## Quick Start
+## Quickstart
 
 ```python
 import nanodisort as nd
@@ -58,51 +56,29 @@ state.allocate()
 state.solve()
 ```
 
-## Development
-
-### Setup development environment
-
-```bash
-uv sync --dev
-```
-
-### (Re)build C++ module
-
-```bash
-uv pip install -ve.
-```
-
-### Run tests
-
-```bash
-uv run task test
-```
-
-### Run linting
-
-```bash
-uv run task lint
-```
-
-### Format code
-
-```bash
-uv run task format
-```
-
-### Build documentation
-
-```bash
-uv run task docs
-```
-
 ## License
 
-This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later), consistent with the cdisort library it wraps.
+This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later), consistent with the CDISORT library it wraps.
 
 ## Acknowledgments
 
-- Timothy E. Dowling (original cdisort C translation)
-- Robert Buras (phase function extensions)
-- Arve Kylling (pseudo-spherical approximation, testing)
-- Original DISORT Fortran authors
+nanodisort authors are grateful to the developers of the many implementations of DISORT, and, in particular, to
+
+- Timothy E. Dowling (original CDISORT C translation);
+- Robert Buras (phase function extensions);
+- Arve Kylling (pseudo-spherical approximation, testing);
+- the original DISORT Fortran authors.
+
+## Citation
+
+If you use nanodisort in your research, please cite the [CDISORT paper](https://doi.org/10.1016/j.jqsrt.2011.03.019) and the nanodisort repository:
+
+```bibtex
+@software{Leroy_nanodisort,
+    author = {Leroy, Vincent and Emde, Claudia},
+    license = {GPL-3.0-or-later},
+    title = {{nanodisort}},
+    url = {https://github.com/eradiate/nanodisort},
+    version = {0.1.0}
+}
+```
