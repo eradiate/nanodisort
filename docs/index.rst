@@ -1,6 +1,9 @@
 nanodisort documentation
 ========================
 
+**Date**: |today| |
+**Version**: |version|
+
 **nanodisort** provides Python bindings for CDISORT, a C implementation of the
 DISORT (Discrete Ordinates Radiative Transfer) program for solving the
 radiative transfer equation.

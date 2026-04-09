@@ -1,16 +1,15 @@
 """Sphinx configuration for nanodisort documentation."""
 
-import os
-import sys
+import datetime
 
-# Add source to path
-sys.path.insert(0, os.path.abspath("../src"))
+import nanodisort
 
 # Project information
 project = "nanodisort"
-copyright = "2025, Rayference"
+copyright = f"2025-{datetime.datetime.now().year}, Rayference"
 author = "Vincent Leroy"
-release = "0.1.0"
+version = nanodisort.__version__
+release = version
 
 # General configuration
 extensions = [
@@ -61,6 +60,7 @@ html_theme_options = {
         {"title": "Home", "url": "index"},
         {"title": "API Reference", "url": "api"},
     ],
+    "accent_color": "yellow",
 }
 
 # Autodoc options

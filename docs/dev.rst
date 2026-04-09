@@ -57,3 +57,51 @@ Build documentation
 
         uv run task docs  # static build
         uv run task docs-serve  # server with auto-rebuild
+
+Release sequence
+----------------
+
+1. Make sure all CI checks pass.
+2. Set the ``$RELEASE_VERSION`` environment variable to the target value:
+
+   .. code-block:: bash
+
+       export RELEASE_VERSION=X.Y.Z
+
+3. Bump the version to the target value:
+
+   .. code-block:: bash
+
+       uv version $RELEASE_VERSION
+
+4. Update the release notes (CHANGELOG.md).
+5. Commit and push the changes:
+
+   .. code-block:: bash
+
+       git commit -am "Bump version to $RELEASE_VERSION"
+       git push origin main
+
+6. Create a tag for the target release and push it:
+
+   .. code-block:: bash
+
+       git tag v$RELEASE_VERSION
+       git push origin v$RELEASE_VERSION
+
+   This will automatically run the GitHub Actions build job and publish the package to PyPI. Proceed with care!
+
+7. Bump the version to the next development version:
+
+   .. code-block:: bash
+
+       uv version --bump minor --bump dev
+
+   Use the ``--dry-run`` flag in case of doubt.
+
+8. Commit and push the changes:
+
+   .. code-block:: bash
+
+       git commit -am "Ready for next development cycle"
+       git push origin main
