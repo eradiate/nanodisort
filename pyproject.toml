@@ -97,7 +97,7 @@ skip = ["pp*", "*-musllinux_*"]
 archs = ["x86_64"]
 
 [tool.cibuildwheel.macos]
-archs = ["native"]
+archs = ["x86_64", "arm64"]
 
 [tool.ruff]
 line-length = 88
