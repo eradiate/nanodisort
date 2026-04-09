@@ -98,6 +98,7 @@ archs = ["x86_64"]
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
+environment = { MACOSX_DEPLOYMENT_TARGET = "10.13" }
 
 [tool.ruff]
 line-length = 88
