@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Python bindings for cdisort radiative transfer solver"
 readme = "README.md"
 authors = [{ name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }]
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.14"
 dependencies = ["numpy>=1.20"]
 license = { text = "GPL-3.0-or-later" }
 classifiers = [
