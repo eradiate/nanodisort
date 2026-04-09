@@ -1,7 +1,7 @@
 [project]
 name = "nanodisort"
 version = "0.1.0.dev1"
-description = "Python bindings for cdisort radiative transfer solver"
+description = "Python bindings for the CDISORT radiative transfer solver"
 readme = "README.md"
 authors = [{ name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }]
 requires-python = ">=3.9,<3.14"
