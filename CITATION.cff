@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: nanodisort
+abstract: Python bindings for CDISORT, a C implementation of the DISORT (Discrete Ordinates Radiative Transfer) solver for plane-parallel atmospheres.
+version: 0.1.0
+license: GPL-3.0-or-later
+repository-code: https://github.com/eradiate/nanodisort
+authors:
+  - family-names: Leroy
+    given-names: Vincent
+    email: vincent.leroy@rayference.eu
