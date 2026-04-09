@@ -44,7 +44,7 @@
     .. autoattribute:: btemp
     .. autoattribute:: ttemp
     .. autoattribute:: temis
-
+    .. autoattribute:: brdf_type
 
     .. rubric:: Other scalar parameters
         :heading-level: 3
@@ -92,3 +92,5 @@
 
     .. autoattribute:: albmed
     .. autoattribute:: trnmed
+
+.. autoclass:: nanodisort.BRDFType

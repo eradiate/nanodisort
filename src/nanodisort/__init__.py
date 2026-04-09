@@ -24,6 +24,7 @@ Examples
 
 from __future__ import annotations
 
+import enum
 import itertools
 
 import numpy as np
@@ -105,6 +106,7 @@ class DisortState(_DisortState):
     albmed: NDArray[np.float64]
     trnmed: NDArray[np.float64]
     old_intensity_correction: bool
+    brdf_type: BRDFType
 
     def __init__(self) -> None:
         """
@@ -295,4 +297,17 @@ class BatchSolver(_BatchSolver):
         super().__init__(nthreads)
 
 
-__all__ = ["__version__", "BatchSolver", "DisortState"]
+class BRDFType(enum.IntEnum):
+    """BRDF model type for non-Lambertian surface reflection.
+
+    Pass to :attr:`DisortState.brdf_type` together with ``lamber=False`` to
+    activate a bidirectional reflectance model.
+    """
+
+    NONE = 0
+    # RPV = 1
+    # CAM = 2
+    HAPKE = 4
+
+
+__all__ = ["__version__", "BatchSolver", "BRDFType", "DisortState"]

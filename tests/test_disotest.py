@@ -24,7 +24,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-from nanodisort import DisortState
+from nanodisort import BRDFType, DisortState
 from nanodisort.utils import phase_functions as pf
 
 
@@ -978,6 +978,737 @@ class TestDisort05:
         assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
         assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
         assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+
+
+class TestDisort06:
+    """
+    Test Problem 6: No Scattering, Increasingly Complex Sources
+
+    Single layer, no scattering (ssalb=0). Starting from a simple beam source
+    in a transparent medium, sub-cases progressively add optical depth, surface
+    reflection (Lambertian and Hapke BRDF), and thermal emission (boundary and
+    internal). 8 sub-cases total.
+    """
+
+    _TEST_06_PARAMS = {
+        # Case 6a: transparent medium, beam source, no reflection
+        "a": {
+            "lamber": True,
+            "brdf_type": BRDFType.NONE,
+            "planck": False,
+            "ntau": 2,
+            "dtauc": [0.0],
+            "utau": [0.0, 0.0],
+            "albedo": 0.0,
+            "fisot": 0.0,
+            "ttemp": None,
+            "btemp": None,
+            "temis": None,
+            "temper": None,
+            "wvnmlo": None,
+            "wvnmhi": None,
+            "expected_rfldir": [100.0, 100.0],
+            "expected_rfldn": [0.0, 0.0],
+            "expected_flup": [0.0, 0.0],
+            "expected_dfdt": [200.0, 200.0],
+            "expected_uu": np.zeros((4, 2, 1)),
+        },
+        # Case 6b: add optical depth, beam source, no reflection
+        "b": {
+            "lamber": True,
+            "brdf_type": BRDFType.NONE,
+            "planck": False,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.0,
+            "fisot": 0.0,
+            "ttemp": None,
+            "btemp": None,
+            "temis": None,
+            "temper": None,
+            "wvnmlo": None,
+            "wvnmhi": None,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [0.0, 0.0, 0.0],
+            "expected_flup": [0.0, 0.0, 0.0],
+            "expected_dfdt": [200.0, 7.35759e1, 2.70671e1],
+            "expected_uu": np.zeros((4, 3, 1)),
+        },
+        # Case 6c: Lambertian surface reflection (albedo=0.5)
+        "c": {
+            "lamber": True,
+            "brdf_type": BRDFType.NONE,
+            "planck": False,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.5,
+            "fisot": 0.0,
+            "ttemp": None,
+            "btemp": None,
+            "temis": None,
+            "temper": None,
+            "wvnmlo": None,
+            "wvnmhi": None,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [0.0, 0.0, 0.0],
+            "expected_flup": [1.48450, 2.99914, 6.76676],
+            "expected_dfdt": [2.02010e2, 7.79962e1, 4.06006e1],
+            "expected_uu": np.array(
+                [
+                    [[0.0], [0.0], [0.0]],
+                    [[0.0], [0.0], [0.0]],
+                    [[9.77882e-5], [1.45131e-2], [2.15393]],
+                    [[7.92386e-1], [1.30642], [2.15393]],
+                ]
+            ),
+        },
+        # Case 6d: non-Lambertian Hapke surface, no thermal emission
+        "d": {
+            "lamber": False,
+            "brdf_type": BRDFType.HAPKE,
+            "planck": False,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.0,
+            "fisot": 0.0,
+            "ttemp": None,
+            "btemp": None,
+            "temis": None,
+            "temper": None,
+            "wvnmlo": None,
+            "wvnmhi": None,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [0.0, 0.0, 0.0],
+            "expected_flup": [6.70783e-1, 1.39084, 3.31655],
+            "expected_dfdt": [2.00936e2, 7.57187e1, 3.45317e1],
+            "expected_uu": np.array(
+                [
+                    [[0.0], [0.0], [0.0]],
+                    [[0.0], [0.0], [0.0]],
+                    [[6.80068e-5], [1.00931e-2], [1.49795]],
+                    [[3.15441e-1], [5.20074e-1], [8.57458e-1]],
+                ]
+            ),
+        },
+        # Case 6e: add bottom-boundary thermal emission (btemp=300 K)
+        "e": {
+            "lamber": False,
+            "brdf_type": BRDFType.HAPKE,
+            "planck": True,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.0,
+            "fisot": 0.0,
+            "ttemp": 0.0,
+            "btemp": 300.0,
+            "temis": 1.0,
+            "temper": [0.0, 0.0],
+            "wvnmlo": 0.0,
+            "wvnmhi": 50000.0,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [0.0, 0.0, 0.0],
+            "expected_flup": [7.95458e1, 1.59902e2, 3.56410e2],
+            "expected_dfdt": [3.07079e2, 3.07108e2, 7.17467e2],
+            "expected_uu": np.array(
+                [
+                    [[0.0], [0.0], [0.0]],
+                    [[0.0], [0.0], [0.0]],
+                    [[4.53789e-3], [6.73483e-1], [9.99537e1]],
+                    [[4.33773e1], [7.15170e1], [1.17912e2]],
+                ]
+            ),
+        },
+        # Case 6f: add top-boundary diffuse incidence and top emission
+        "f": {
+            "lamber": False,
+            "brdf_type": BRDFType.HAPKE,
+            "planck": True,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.0,
+            "fisot": 100.0 / np.pi,
+            "ttemp": 250.0,
+            "btemp": 300.0,
+            "temis": 1.0,
+            "temper": [0.0, 0.0],
+            "wvnmlo": 0.0,
+            "wvnmhi": 50000.0,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [3.21497e2, 1.42493e2, 7.05305e1],
+            "expected_flup": [8.27917e1, 1.66532e2, 3.71743e2],
+            "expected_dfdt": [9.54523e2, 5.27085e2, 8.45341e2],
+            "expected_uu": np.array(
+                [
+                    [[1.02336e2], [6.20697e1], [3.76472e1]],
+                    [[1.02336e2], [6.89532e-1], [4.64603e-3]],
+                    [[4.80531e-3], [7.13172e-1], [1.05844e2]],
+                    [[4.50168e1], [7.42191e1], [1.22368e2]],
+                ]
+            ),
+        },
+        # Case 6g: add internal thermal emission (layer temperatures 250->300 K)
+        "g": {
+            "lamber": False,
+            "brdf_type": BRDFType.HAPKE,
+            "planck": True,
+            "ntau": 3,
+            "dtauc": [1.0],
+            "utau": [0.0, 0.5, 1.0],
+            "albedo": 0.0,
+            "fisot": 100.0 / np.pi,
+            "ttemp": 250.0,
+            "btemp": 300.0,
+            "temis": 1.0,
+            "temper": [250.0, 300.0],
+            "wvnmlo": 0.0,
+            "wvnmhi": 50000.0,
+            "expected_rfldir": [100.0, 3.67879e1, 1.35335e1],
+            "expected_rfldn": [3.21497e2, 3.04775e2, 3.63632e2],
+            "expected_flup": [3.35292e2, 4.12540e2, 4.41125e2],
+            "expected_dfdt": [5.80394e2, 1.27117e2, -1.68003e2],
+            "expected_uu": np.array(
+                [
+                    [[1.02336e2], [9.78748e1], [1.10061e2]],
+                    [[1.02336e2], [1.01048e2], [1.38631e2]],
+                    [[7.80733e1], [1.15819e2], [1.38695e2]],
+                    [[1.16430e2], [1.34966e2], [1.40974e2]],
+                ]
+            ),
+        },
+        # Case 6h: increase optical depth to 10
+        "h": {
+            "lamber": False,
+            "brdf_type": BRDFType.HAPKE,
+            "planck": True,
+            "ntau": 3,
+            "dtauc": [10.0],
+            "utau": [0.0, 1.0, 10.0],
+            "albedo": 0.0,
+            "fisot": 100.0 / np.pi,
+            "ttemp": 250.0,
+            "btemp": 300.0,
+            "temis": 1.0,
+            "temper": [250.0, 300.0],
+            "wvnmlo": 0.0,
+            "wvnmhi": 50000.0,
+            "expected_rfldir": [100.0, 1.35335e1, 2.06115e-7],
+            "expected_rfldn": [3.21497e2, 2.55455e2, 4.43444e2],
+            "expected_flup": [2.37350e2, 2.61130e2, 4.55861e2],
+            "expected_dfdt": [4.23780e2, 6.19828e1, -3.11658e1],
+            "expected_uu": np.array(
+                [
+                    [[1.02336e2], [8.49992e1], [1.38631e2]],
+                    [[1.02336e2], [7.73186e1], [1.45441e2]],
+                    [[7.12616e1], [7.88310e1], [1.44792e2]],
+                    [[7.80736e1], [8.56423e1], [1.45163e2]],
+                ]
+            ),
+        },
+    }
+
+    @pytest.mark.parametrize(
+        "case_id, lamber, brdf_type, planck, ntau, dtauc, utau, albedo, fisot, "
+        "ttemp, btemp, temis, temper, wvnmlo, wvnmhi, "
+        "expected_rfldir, expected_rfldn, expected_flup, expected_dfdt, expected_uu",
+        [
+            (
+                k,
+                v["lamber"],
+                v["brdf_type"],
+                v["planck"],
+                v["ntau"],
+                v["dtauc"],
+                v["utau"],
+                v["albedo"],
+                v["fisot"],
+                v["ttemp"],
+                v["btemp"],
+                v["temis"],
+                v["temper"],
+                v["wvnmlo"],
+                v["wvnmhi"],
+                v["expected_rfldir"],
+                v["expected_rfldn"],
+                v["expected_flup"],
+                v["expected_dfdt"],
+                v["expected_uu"],
+            )
+            for k, v in _TEST_06_PARAMS.items()
+        ],
+        ids=list(_TEST_06_PARAMS.keys()),
+    )
+    def test(
+        self,
+        case_id,
+        lamber,
+        brdf_type,
+        planck,
+        ntau,
+        dtauc,
+        utau,
+        albedo,
+        fisot,
+        ttemp,
+        btemp,
+        temis,
+        temper,
+        wvnmlo,
+        wvnmhi,
+        expected_rfldir,
+        expected_rfldn,
+        expected_flup,
+        expected_dfdt,
+        expected_uu,
+    ):
+        """
+        Run a single test case for Test 6.
+
+        Parameters
+        ----------
+        case_id : str
+            Subcase ID.
+        """
+        ds = DisortState()
+
+        # Set dimensions
+        ds.nstr = 16
+        ds.nlyr = 1
+        ds.nmom = 0
+        ds.ntau = ntau
+        ds.numu = 4
+        ds.nphi = 1
+
+        # Set flags
+        ds.usrtau = True
+        ds.usrang = True
+        ds.lamber = lamber
+        ds.planck = planck
+        ds.onlyfl = False
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+        ds.brdf_type = brdf_type
+
+        if planck:
+            ds.wvnmlo = wvnmlo
+            ds.wvnmhi = wvnmhi
+
+        # Allocate memory
+        ds.allocate()
+
+        # Set optical properties (no scattering); pmom shape must be (nstr+1, nlyr)
+        ds.dtauc = np.array(dtauc)
+        ds.ssalb = np.array([0.0])
+        ds.pmom = pf.isotropic(ds.nstr).reshape(-1, 1)
+
+        # Set output optical depths and angles
+        ds.utau = np.array(utau)
+        ds.umu = np.array([-1.0, -0.1, 0.1, 1.0])
+        ds.phi = np.array([90.0])
+
+        # Set boundary conditions
+        ds.fbeam = 200.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = fisot
+        ds.fluor = 0.0
+        ds.albedo = albedo
+
+        if planck:
+            ds.ttemp = ttemp
+            ds.btemp = btemp
+            ds.temis = temis
+            ds.temper = np.array(temper)
+
+        # Run solver
+        ds.solve()
+
+        print(f"\nTest 6{case_id}")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+
+
+class TestDisort07:
+    """
+    Test Problem 7: Absorption + Scattering + All Possible Sources, Various
+    Surface Reflectivities (One Layer)
+
+    Compare 7a fluxes to Ref. KS (Kylling & Stamnes), Table I, and 7b to
+    Table II. Sub-cases progressively vary the surface treatment from black to
+    Lambertian to non-Lambertian Hapke BRDF, with all source types active.
+    """
+
+    def _setup_common_7cde(self, ds: DisortState) -> None:
+        """Configure geometry shared by sub-cases 7c, 7d, and 7e."""
+        ds.nstr = 12
+        ds.nlyr = 1
+        ds.nmom = 12
+        ds.ntau = 3
+        ds.numu = 4
+        ds.nphi = 2
+        ds.usrtau = True
+        ds.usrang = True
+        ds.planck = True
+        ds.onlyfl = False
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+        ds.wvnmlo = 0.0
+        ds.wvnmhi = 50000.0
+
+    def test_7a(self):
+        """
+        7a: Absorption + scattering, internal thermal sources only (flux only).
+
+        Compare to Ref. KS, Table I (tau=1.0, a=0.1, g=0.05).
+        """
+        ds = DisortState()
+        ds.nstr = 16
+        ds.nlyr = 1
+        ds.nmom = 16
+        ds.ntau = 2
+        ds.numu = 2
+        ds.nphi = 1
+        ds.usrtau = True
+        ds.usrang = False
+        ds.lamber = True
+        ds.planck = True
+        ds.onlyfl = True
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+        ds.wvnmlo = 300.0
+        ds.wvnmhi = 800.0
+
+        ds.allocate()
+
+        ds.dtauc = np.array([1.0])
+        ds.ssalb = np.array([0.1])
+        ds.pmom = pf.henyey_greenstein(0.05, 16).reshape(-1, 1)
+        ds.utau = np.array([0.0, 1.0])
+        ds.umu = np.array([-1.0, 1.0])
+        ds.phi = np.array([0.0])
+        ds.temper = np.array([200.0, 300.0])
+
+        ds.fbeam = 0.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 0.0
+        ds.fluor = 0.0
+        ds.albedo = 0.0
+        ds.ttemp = 0.0
+        ds.btemp = 0.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 7a: KS Table I, tau=1.0, a=0.1, g=0.05")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldn, [0.0, 1.21204e2], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.flup, [8.62936e1, 0.0], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.dfdt, [-5.13731e1, -5.41036e2], rtol=1e-3, atol=1e-9)
+
+    def test_7b(self):
+        """
+        7b: Very thick layer, narrow spectral band.
+
+        Compare to Ref. KS, Table II (tau=100, a=0.95, g=0.75).
+        """
+        ds = DisortState()
+        ds.nstr = 16
+        ds.nlyr = 1
+        ds.nmom = 16
+        ds.ntau = 2
+        ds.numu = 2
+        ds.nphi = 1
+        ds.usrtau = True
+        ds.usrang = True
+        ds.lamber = True
+        ds.planck = True
+        ds.onlyfl = False
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+        ds.wvnmlo = 2702.99
+        ds.wvnmhi = 2703.01
+
+        ds.allocate()
+
+        ds.dtauc = np.array([100.0])
+        ds.ssalb = np.array([0.95])
+        ds.pmom = pf.henyey_greenstein(0.75, 16).reshape(-1, 1)
+        ds.utau = np.array([0.0, 100.0])
+        ds.umu = np.array([-1.0, 1.0])
+        ds.phi = np.array([0.0])
+        ds.temper = np.array([200.0, 300.0])
+
+        ds.fbeam = 0.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 0.0
+        ds.fluor = 0.0
+        ds.albedo = 0.0
+        ds.ttemp = 0.0
+        ds.btemp = 0.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 7b: KS Table II, tau=100, a=0.95, g=0.75")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+        print(f"  uu:     {ds.uu}")
+
+        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldn, [0.0, 2.07786e-5], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.flup, [1.10949e-6, 0.0], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.dfdt, [8.23219e-8, -5.06461e-6], rtol=1e-3, atol=1e-9)
+        # uu shape: (numu=2, ntau=2, nphi=1)
+        expected_uu = np.array(
+            [
+                [[0.0], [7.52311e-6]],
+                [[4.65744e-7], [0.0]],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-12)
+
+    def test_7c(self):
+        """7c: All sources, black surface (albedo=0)."""
+        ds = DisortState()
+        self._setup_common_7cde(ds)
+        ds.lamber = True
+
+        ds.allocate()
+
+        ds.dtauc = np.array([1.0])
+        ds.ssalb = np.array([0.5])
+        ds.pmom = pf.henyey_greenstein(0.8, 12).reshape(-1, 1)
+        ds.utau = np.array([0.0, 0.5, 1.0])
+        ds.umu = np.array([-1.0, -0.1, 0.1, 1.0])
+        ds.phi = np.array([0.0, 90.0])
+        ds.temper = np.array([300.0, 200.0])
+
+        ds.fbeam = 200.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 100.0
+        ds.fluor = 0.0
+        ds.albedo = 0.0
+        ds.ttemp = 100.0
+        ds.btemp = 320.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 7c: All sources, albedo=0")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(
+            ds.rfldn, [3.19830e2, 3.54099e2, 3.01334e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.flup, [4.29572e2, 4.47018e2, 5.94576e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.dfdt, [-8.04270e1, 2.51589e2, 7.15964e2], rtol=1e-3, atol=1e-9
+        )
+
+        # uu shape: (numu=4, ntau=3, nphi=2); phi order: [0, 90]
+        expected_uu = np.array(
+            [
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.06583e2, 1.06583e2],
+                    [9.66519e1, 9.66519e1],
+                ],
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.28565e2, 1.06408e2],
+                    [8.65854e1, 7.49310e1],
+                ],
+                [
+                    [1.46775e2, 1.29641e2],
+                    [1.04464e2, 9.48418e1],
+                    [1.89259e2, 1.89259e2],
+                ],
+                [
+                    [1.49033e2, 1.49033e2],
+                    [1.59054e2, 1.59054e2],
+                    [1.89259e2, 1.89259e2],
+                ],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+
+    def test_7d(self):
+        """7d: All sources, white Lambertian surface (albedo=1)."""
+        ds = DisortState()
+        self._setup_common_7cde(ds)
+        ds.lamber = True
+
+        ds.allocate()
+
+        ds.dtauc = np.array([1.0])
+        ds.ssalb = np.array([0.5])
+        ds.pmom = pf.henyey_greenstein(0.8, 12).reshape(-1, 1)
+        ds.utau = np.array([0.0, 0.5, 1.0])
+        ds.umu = np.array([-1.0, -0.1, 0.1, 1.0])
+        ds.phi = np.array([0.0, 90.0])
+        ds.temper = np.array([300.0, 200.0])
+
+        ds.fbeam = 200.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 100.0
+        ds.fluor = 0.0
+        ds.albedo = 1.0
+        ds.ttemp = 100.0
+        ds.btemp = 320.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 7d: All sources, albedo=1 (Lambertian)")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(
+            ds.rfldn, [3.19830e2, 3.50555e2, 2.92063e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.flup, [3.12563e2, 2.68126e2, 3.05596e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.dfdt, [-1.68356e2, 1.01251e2, 4.09326e2], rtol=1e-3, atol=1e-9
+        )
+
+        expected_uu = np.array(
+            [
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.06203e2, 1.06203e2],
+                    [9.56010e1, 9.56010e1],
+                ],
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.23126e2, 1.00969e2],
+                    [7.25576e1, 6.09031e1],
+                ],
+                [
+                    [1.40977e2, 1.23843e2],
+                    [9.19545e1, 8.23318e1],
+                    [9.72743e1, 9.72743e1],
+                ],
+                [
+                    [9.62764e1, 9.62764e1],
+                    [8.89528e1, 8.89528e1],
+                    [9.72743e1, 9.72743e1],
+                ],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+
+    def test_7e(self):
+        """7e: All sources, non-Lambertian Hapke surface."""
+        ds = DisortState()
+        self._setup_common_7cde(ds)
+        ds.lamber = False
+        ds.brdf_type = BRDFType.HAPKE
+
+        ds.allocate()
+
+        ds.dtauc = np.array([1.0])
+        ds.ssalb = np.array([0.5])
+        ds.pmom = pf.henyey_greenstein(0.8, 12).reshape(-1, 1)
+        ds.utau = np.array([0.0, 0.5, 1.0])
+        ds.umu = np.array([-1.0, -0.1, 0.1, 1.0])
+        ds.phi = np.array([0.0, 90.0])
+        ds.temper = np.array([300.0, 200.0])
+
+        ds.fbeam = 200.0
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 100.0
+        ds.fluor = 0.0
+        ds.ttemp = 100.0
+        ds.btemp = 320.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 7e: All sources, Hapke BRDF")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(
+            ds.rfldn, [3.19830e2, 3.53275e2, 2.99002e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.flup, [4.04300e2, 4.07843e2, 5.29248e2], rtol=1e-3, atol=1e-9
+        )
+        assert_allclose(
+            ds.dfdt, [-9.98568e1, 2.17387e2, 6.38461e2], rtol=1e-3, atol=1e-9
+        )
+
+        expected_uu = np.array(
+            [
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.06496e2, 1.06496e2],
+                    [9.63993e1, 9.63993e1],
+                ],
+                [
+                    [1.01805e2, 1.01805e2],
+                    [1.27296e2, 1.05111e2],
+                    [8.29009e1, 7.11248e1],
+                ],
+                [
+                    [1.45448e2, 1.28281e2],
+                    [1.01395e2, 9.16726e1],
+                    [1.60734e2, 1.59286e2],
+                ],
+                [
+                    [1.38554e2, 1.38554e2],
+                    [1.45229e2, 1.45229e2],
+                    [1.71307e2, 1.71307e2],
+                ],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
 
 
 class TestDisort08:
