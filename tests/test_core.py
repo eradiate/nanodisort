@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Rayference
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 Basic test cases for nanodisort solver
 

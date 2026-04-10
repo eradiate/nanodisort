@@ -1,0 +1,24 @@
+# REUSE.toml
+version = 1
+
+[[annotations]]
+# Default
+path = "**"
+SPDX-FileCopyrightText = "2025 Rayference"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+# CDISORT specifics
+path = ["ext/cdisort-2.1.3/**"]
+SPDX-FileCopyrightText = "2011 Timothy E. Dowling"
+SPDX-License-Identifier = "GPL-2.0-or-later"
+
+[[annotations]]
+# CDISORT specifics
+path = ["ext/cdisort-2.1.3/locate.*"]
+SPDX-FileCopyrightText = "1997-2012 Arve Kylling, Bernhard Mayer, Claudia Emde, Robert Buras"
+SPDX-License-Identifier = "GPL-2.0-or-later"
+
+[[annotations]]
+# These have per-file headers
+path = ["benchmarks/**", "src/**", "tests/**"]

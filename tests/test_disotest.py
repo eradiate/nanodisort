@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Rayference
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 Port of disotest.c test cases to Python.
 
