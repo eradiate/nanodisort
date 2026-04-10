@@ -61,7 +61,7 @@ html_theme_options = {
         {"title": "Home", "url": "index"},
         {"title": "API Reference", "url": "api"},
     ],
-    "accent_color": "yellow",
+    "accent_color": "amber",
 }
 
 # Autodoc options

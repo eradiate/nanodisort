@@ -207,14 +207,6 @@ class BatchSolver(_BatchSolver):
     intensities, surface albedos) are provided as arrays with a leading
     batch dimension.
 
-    Thread safety requires ``quiet=True`` and ``lamber=True``. These are
-    enforced at allocation time.
-
-    Parameters
-    ----------
-    nthreads : int, optional
-        Number of worker threads. Defaults to the hardware concurrency.
-
     Examples
     --------
     >>> import nanodisort as nd
@@ -243,6 +235,12 @@ class BatchSolver(_BatchSolver):
     >>> solver.set_albedo(np.zeros(nbatch))
     >>> solver.solve()
     >>> rfldir = solver.rfldir  # shape (nbatch, 2)
+
+    Warnings
+    --------
+    Thread safety requires ``quiet=True`` and ``lamber=True``. These are
+    enforced at allocation time, which means that this class does not
+    achieve feature parity with :class:`.DisortState`.
     """
 
     # Type annotations for properties
