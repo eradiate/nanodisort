@@ -1,5 +1,11 @@
 # nanodisort
 
+[![PyPI version](https://img.shields.io/pypi/v/nanodisort?color=blue)](https://pypi.org/project/nanodisort)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/eradiate/nanodisort/ci.yml?branch=main)](https://github.com/eradiate/nanodisort/actions/workflows/ci.yml)
+[![Documentation Status](https://img.shields.io/readthedocs/nanodisort)](https://nanodisort.readthedocs.io)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 Python bindings for [CDISORT](http://www.libradtran.org/doku.php?id=cdisort), a C implementation of the DISORT (Discrete Ordinates Radiative Transfer) solver.
 
 ## Overview
@@ -16,19 +22,15 @@ The CDISORT library offers improved performance over the original Fortran versio
 
 ## Installation
 
-### Prerequisites
+```bash
+pip install nanodisort
+```
 
+Prerequisites:
+
+- Supported platforms: Linux, macOS
 - Python 3.9 to 3.13
 - NumPy 1.20 or later
-
-### From source
-
-```bash
-git clone https://github.com/rayference/nanodisort.git
-cd nanodisort
-uv sync --dev
-uv pip install -e .
-```
 
 ## Quickstart
 
