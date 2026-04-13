@@ -99,7 +99,7 @@ nanodisort authors are grateful to the developers of the many implementations of
 - Timothy E. Dowling (original CDISORT C translation);
 - Robert Buras (phase function extensions);
 - Arve Kylling (pseudo-spherical approximation, testing);
-- the original DISORT Fortran authors.
+- the original DISORT Fortran authors (Knuth Stamnes, Si-Chee Tsay, Warren Wiscombe and Kolf Jayaweera).
 
 Citation
 --------

@@ -56,7 +56,7 @@ html_static_path = ["_static"]
 html_title = "nanodisort"
 
 html_theme_options = {
-    "github_url": "https://github.com/rayference/nanodisort",
+    "github_url": "https://github.com/eradiate/nanodisort",
     "nav_links": [
         {"title": "Home", "url": "index"},
         {"title": "API Reference", "url": "api"},
