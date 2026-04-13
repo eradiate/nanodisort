@@ -35,6 +35,8 @@ docs = [
   "shibuya>=2024.0",
   "sphinx-autobuild>=2024.0",
   "sphinxcontrib-bibtex>=2.6.0",
+  "myst-nb>=1.0.0",
+  "sphinx-copybutton>=0.5.2",
 ]
 build = ["nanobind>=2.9.0", "scikit-build-core>=0.11.0"]
 test = ["pytest>=7.0", "pytest-cov>=4.0"]
@@ -43,9 +45,7 @@ dev = [
   "ipykernel>=6.31.0",
   "jupyterlab",
   "nanobind>=2.9.2",
-  "myst-nb>=1.0.0",
   "ruff>=0.1.0",
-  "sphinx-copybutton>=0.5.2",
   "taskipy>=1.12.0",
   { include-group = "build" },
   { include-group = "docs" },
@@ -133,6 +133,7 @@ build = "uv build"
 clean = "rm -rf build dist .pytest_cache .coverage htmlcov"
 
 # Documentation tasks
+docs-lock = "uv export --only-group docs --no-hashes --no-emit-project -o docs/requirements.txt"
 docs = "sphinx-build -b html docs docs/_build/html"
 docs-serve = "sphinx-autobuild -b html docs docs/_build/html"
 docs-clean = "rm -rf docs/_build"

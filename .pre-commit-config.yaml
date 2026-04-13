@@ -1,4 +1,12 @@
 repos:
+  - repo: local
+    hooks:
+      - id: uv-export-docs
+        name: Export docs requirements
+        language: system
+        entry: uv run task docs-lock
+        files: ^(uv\.lock|pyproject\.toml)$
+        pass_filenames: false
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.7
     hooks:
