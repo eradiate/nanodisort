@@ -28,14 +28,15 @@ double precision arithmetic.
 Installation
 ------------
 
-From source:
-
 .. code-block:: bash
 
-    git clone https://github.com/rayference/nanodisort.git
-    cd nanodisort
-    uv sync --extra dev
-    uv pip install -e .
+    pip install nanodisort
+
+Prerequisites:
+
+- Supported platforms: Linux, macOS
+- Python 3.9 to 3.13
+- NumPy 1.20 or later
 
 Quickstart
 -----------
