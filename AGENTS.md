@@ -64,7 +64,7 @@ uv run task docs
 - Configure dimensions: `nstr`, `nlyr`, `nmom`, `ntau`, `numu`, `nphi`
 - Set flags: `usrtau`, `usrang`, `lamber`, `planck`, `onlyfl`, `quiet`, `intensity_correction`, `spher`
 - Set boundary conditions: `fbeam`, `umu0`, `phi0`, `fisot`, `albedo`, etc.
-- Set optical properties: `dtauc` (layer optical depths), `ssalb` (single scattering albedo), `pmom` (phase function moments)
+- Set optical properties: `dtauc` (layer optical thicknesses), `ssalb` (single scattering albedo), `pmom` (phase function moments)
 - Call `allocate()` then `solve()`
 - Read outputs: `rfldir`, `rfldn`, `flup`, `dfdt`, `uu` (intensity), etc.
 

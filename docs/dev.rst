@@ -51,7 +51,6 @@ Format code
 
         uv run task format
 
-
 Build documentation
     .. code-block:: bash
 

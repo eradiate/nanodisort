@@ -881,11 +881,11 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(nstr, "Number of streams (discretization of the azimuth angle dimension).")
         BIND_PROPERTY_RW(nlyr, "Number of computational layers (discretization of the vertical dimension).")
         BIND_PROPERTY_RW(nmom, "Number of phase function moments. Set to -1 to disable scattering.")
-        BIND_PROPERTY_RW(ntau, "Number of user optical depths.")
+        BIND_PROPERTY_RW(ntau, "Number of user optical thicknesses.")
         BIND_PROPERTY_RW(numu, "Number of user polar angles.")
         BIND_PROPERTY_RW(nphi, "Number of user azimuth angles.")
         // Control flags
-        BIND_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical depths.")
+        BIND_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical thicknesses.")
         BIND_PROPERTY_RW(usrang, "Return radiant quantities at user-specified polar angles.")
         BIND_PROPERTY_RW(lamber, "Isotropically reflecting bottom boundary.")
         BIND_PROPERTY_RW(planck, "Include thermal emission.")
@@ -910,19 +910,19 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(wvnmlo, "Wavenumber lower bound [cm⁻¹] for Planck function.")
         BIND_PROPERTY_RW(wvnmhi, "Wavenumber upper bound [cm⁻¹] for Planck function.")
         // Optical property arrays
-        BIND_PROPERTY_RW(dtauc, "Optical depths of computational layers [nlyr].")
+        BIND_PROPERTY_RW(dtauc, "Optical thicknesses of computational layers [nlyr].")
         BIND_PROPERTY_RW(ssalb, "Single-scattering albedo of computational layers [nlyr].")
         BIND_PROPERTY_RW(pmom, "Phase function moments [nmom_nstr+1, nlyr].")
         // Other input arrays
         BIND_PROPERTY_RW(umu, "Polar angle cosines [numu].")
         BIND_PROPERTY_RW(phi, "Azimuthal angles [degrees] [nphi].")
-        BIND_PROPERTY_RW(utau, "User optical depths [ntau].")
+        BIND_PROPERTY_RW(utau, "User optical thicknesses [ntau].")
         BIND_PROPERTY_RW(temper, "Temperatures [K] at levels [nlyr+1].")
         // Output arrays (read-only)
         BIND_PROPERTY_RO(rfldir, "Direct beam flux (without delta-M scaling) [ntau].")
         BIND_PROPERTY_RO(rfldn, "Diffuse downward flux (without delta-M scaling) [ntau].")
         BIND_PROPERTY_RO(flup, "Diffuse upward flux [ntau].")
-        BIND_PROPERTY_RO(dfdt, "Flux divergence d(net flux)/d(optical depth) [ntau].")
+        BIND_PROPERTY_RO(dfdt, "Flux divergence d(net flux)/d(optical thickness) [ntau].")
         BIND_PROPERTY_RO(uavg, "Mean intensity including direct beam [ntau].")
         BIND_PROPERTY_RO(uavgdn, "Mean diffuse downward intensity [ntau].")
         BIND_PROPERTY_RO(uavgup, "Mean diffuse upward intensity [ntau].")
@@ -962,11 +962,11 @@ NB_MODULE(_core, m) {
         BIND_BATCH_PROPERTY_RW(nstr, "Number of streams.")
         BIND_BATCH_PROPERTY_RW(nlyr, "Number of computational layers.")
         BIND_BATCH_PROPERTY_RW(nmom, "Number of phase function moments.")
-        BIND_BATCH_PROPERTY_RW(ntau, "Number of user optical depths.")
+        BIND_BATCH_PROPERTY_RW(ntau, "Number of user optical thicknesses.")
         BIND_BATCH_PROPERTY_RW(numu, "Number of user polar angles.")
         BIND_BATCH_PROPERTY_RW(nphi, "Number of user azimuth angles.")
         // Shared flags
-        BIND_BATCH_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical depths.")
+        BIND_BATCH_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical thicknesses.")
         BIND_BATCH_PROPERTY_RW(usrang, "Return radiant quantities at user-specified polar angles.")
         BIND_BATCH_PROPERTY_RW(lamber, "Isotropically reflecting bottom boundary (must be True).")
         BIND_BATCH_PROPERTY_RW(planck, "Include thermal emission.")
@@ -993,12 +993,12 @@ NB_MODULE(_core, m) {
         .def("set_phi", &BatchSolver::set_phi, "phi"_a,
              "Set shared azimuthal angles [nphi].")
         .def("set_utau", &BatchSolver::set_utau, "utau"_a,
-             "Set shared user optical depths [ntau].")
+             "Set shared user optical thicknesses [ntau].")
         .def("set_temper", &BatchSolver::set_temper, "temper"_a,
              "Set shared level temperatures [nlyr+1].")
         // Batched input setters
         .def("set_dtauc", &BatchSolver::set_dtauc, "dtauc"_a,
-             "Set optical depths [nbatch, nlyr].")
+             "Set optical thicknesses [nbatch, nlyr].")
         .def("set_ssalb", &BatchSolver::set_ssalb, "ssalb"_a,
              "Set single-scattering albedos [nbatch, nlyr].")
         .def("set_pmom", &BatchSolver::set_pmom, "pmom"_a,
@@ -1008,7 +1008,7 @@ NB_MODULE(_core, m) {
         .def("set_albedo", &BatchSolver::set_albedo, "albedo"_a,
              "Set bottom boundary albedos [nbatch].")
         .def("set_utau_batched", &BatchSolver::set_utau_batched, "utau"_a,
-             "Set per-batch user optical depths [nbatch, ntau].")
+             "Set per-batch user optical thicknesses [nbatch, ntau].")
         // Batched outputs (read-only)
         BIND_BATCH_PROPERTY_RO(rfldir, "Direct beam flux [nbatch, ntau].")
         BIND_BATCH_PROPERTY_RO(rfldn, "Diffuse downward flux [nbatch, ntau].")

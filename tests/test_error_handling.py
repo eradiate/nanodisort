@@ -165,7 +165,7 @@ def test_multiple_errors_sequential():
     disort1.lamber = True
     disort1.allocate()
 
-    # Set invalid optical depth (negative)
+    # Set invalid optical thickness (negative)
     disort1.dtauc = np.array([-0.5])
     disort1.ssalb = np.array([0.9])
     pmom = np.zeros((disort1.nmom + 1, disort1.nlyr))
@@ -204,7 +204,7 @@ def test_multiple_errors_sequential():
 
 
 def test_invalid_optical_depth():
-    """Test that invalid optical depth values are caught."""
+    """Test that invalid optical thickness values are caught."""
     disort = nd.DisortState()
     disort.nstr = 8
     disort.nlyr = 1
@@ -221,7 +221,7 @@ def test_invalid_optical_depth():
     disort.allocate()
 
     # Set optical properties
-    disort.dtauc = np.array([-0.5])  # Invalid: negative optical depth
+    disort.dtauc = np.array([-0.5])  # Invalid: negative optical thickness
     disort.ssalb = np.array([0.9])
     pmom = np.zeros((disort.nmom + 1, disort.nlyr))
     pmom[0, :] = 1.0

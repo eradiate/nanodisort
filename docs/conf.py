@@ -20,7 +20,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
-    "nbsphinx",
+    "myst_nb",
 ]
 
 # Napoleon settings (for Numpydoc)
@@ -76,5 +76,8 @@ autodoc_class_signature = "separated"
 autodoc_member_order = "bysource"
 autodoc_typehints_format = "short"
 
-# nbsphinx options
-nbsphinx_execute = "never"  # TODO:
+# myst-nb options
+nb_execution_mode = "off"
+
+# MyST options
+myst_enable_extensions = ["dollarmath"]

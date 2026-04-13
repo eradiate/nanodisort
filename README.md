@@ -44,7 +44,7 @@ state = nd.DisortState()
 state.nstr = 8   # Number of streams
 state.nlyr = 6   # Number of layers
 state.nmom = 8   # Number of phase function moments
-state.ntau = 5   # Number of output optical depths
+state.ntau = 5   # Number of output optical thicknesses
 state.numu = 4   # Number of output polar angles
 state.nphi = 3   # Number of output azimuthal angles
 

@@ -35,7 +35,7 @@ class TestDisort01:
     Compare to Ref. VH1, Table 12
 
     This test examines isotropic scattering with various combinations of:
-    - Optical depths: 0.03125, 32.0
+    - Optical thicknesses: 0.03125, 32.0
     - Single scattering albedos: 0.2, 0.99, 1.0
     - Sources: beam, isotropic
     """
@@ -256,7 +256,7 @@ class TestDisort01:
         pmom = pf.isotropic(ds.nmom).reshape(-1, 1)
         ds.pmom = pmom
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array([0.0, utau])
 
         # Set angles
@@ -307,7 +307,7 @@ class TestDisort02:
     Compare to Ref. SW, Table 1
 
     This test examines Rayleigh scattering with:
-    - Optical depths: 0.2, 5.0
+    - Optical thicknesses: 0.2, 5.0
     - Single scattering albedos: 0.5, 1.0
     """
 
@@ -468,7 +468,7 @@ class TestDisort02:
         pmom = pf.rayleigh(ds.nmom).reshape(-1, 1)
         ds.pmom = pmom
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array([0.0, utau])
 
         # Set angles (from Ref. SW)
@@ -519,7 +519,7 @@ class TestDisort03:
 
     This test examines Henyey-Greenstein phase function with asymmetry factor
     g=0.75, testing:
-    - Optical depths: 1.0, 8.0
+    - Optical thicknesses: 1.0, 8.0
     - Single scattering albedo: 1.0
     - nmom=32 (more moments than nstr=16)
     """
@@ -634,7 +634,7 @@ class TestDisort03:
         pmom = pf.henyey_greenstein(0.75, ds.nmom).reshape(-1, 1)
         ds.pmom = pmom
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array([0.0, utau])
 
         # Set angles
@@ -683,7 +683,7 @@ class TestDisort04:
 
     This test examines realistic atmospheric haze scattering using the
     Garcia-Siewert Haze-L phase function with:
-    - Optical depth: 1.0
+    - Optical thickness: 1.0
     - Single scattering albedos: 1.0, 0.9
     - Multiple azimuthal angles (case c)
     """
@@ -805,7 +805,7 @@ class TestDisort04:
         pmom = pf.haze_l(ds.nmom).reshape(-1, 1)
         ds.pmom = pmom
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array([0.0, 0.5, 1.0])
 
         # Set angles
@@ -847,7 +847,7 @@ class TestDisort05:
 
     This test examines realistic cloud scattering using the Garcia-Siewert
     Cloud C.1 phase function with:
-    - Optical depth: 64.0
+    - Optical thickness: 64.0
     - Single scattering albedos: 1.0, 0.9
     - Multiple output levels within the layer
     """
@@ -944,7 +944,7 @@ class TestDisort05:
         pmom = pf.cloud_c1(ds.nmom).reshape(-1, 1)
         ds.pmom = pmom
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array(utau)
 
         # Set angles
@@ -985,7 +985,7 @@ class TestDisort06:
     Test Problem 6: No Scattering, Increasingly Complex Sources
 
     Single layer, no scattering (ssalb=0). Starting from a simple beam source
-    in a transparent medium, sub-cases progressively add optical depth, surface
+    in a transparent medium, sub-cases progressively add optical thickness, surface
     reflection (Lambertian and Hapke BRDF), and thermal emission (boundary and
     internal). 8 sub-cases total.
     """
@@ -1013,7 +1013,7 @@ class TestDisort06:
             "expected_dfdt": [200.0, 200.0],
             "expected_uu": np.zeros((4, 2, 1)),
         },
-        # Case 6b: add optical depth, beam source, no reflection
+        # Case 6b: add optical thickness, beam source, no reflection
         "b": {
             "lamber": True,
             "brdf_type": BRDFType.NONE,
@@ -1180,7 +1180,7 @@ class TestDisort06:
                 ]
             ),
         },
-        # Case 6h: increase optical depth to 10
+        # Case 6h: increase optical thickness to 10
         "h": {
             "lamber": False,
             "brdf_type": BRDFType.HAPKE,
@@ -1307,7 +1307,7 @@ class TestDisort06:
         ds.ssalb = np.array([0.0])
         ds.pmom = pf.isotropic(ds.nstr).reshape(-1, 1)
 
-        # Set output optical depths and angles
+        # Set output optical thicknesses and angles
         ds.utau = np.array(utau)
         ds.umu = np.array([-1.0, -0.1, 0.1, 1.0])
         ds.phi = np.array([90.0])
@@ -1834,7 +1834,7 @@ class TestDisort08:
         pmom = pf.isotropic(ds.nmom).reshape(-1, 1)
         ds.pmom = np.tile(pmom, (1, ds.nlyr))
 
-        # Set output optical depths
+        # Set output optical thicknesses
         ds.utau = np.array(utau)
 
         # Set angles

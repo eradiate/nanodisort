@@ -31,7 +31,7 @@ def test_basic_beam_attenuation():
     ds.nphi = 0  # No azimuthal angles
 
     # Set control flags
-    ds.usrtau = True  # User optical depths
+    ds.usrtau = True  # User optical thicknesses
     ds.usrang = False  # No user angles
     ds.lamber = True  # Lambertian bottom boundary
     ds.planck = False  # No thermal emission
@@ -42,7 +42,7 @@ def test_basic_beam_attenuation():
     ds.allocate()
 
     # Set optical properties
-    # Single layer with optical depth 1.0, pure scattering
+    # Single layer with optical thickness 1.0, pure scattering
     ds.dtauc = np.array([1.0])
     ds.ssalb = np.array([1.0])  # Single scattering albedo = 1 (no absorption)
 
@@ -51,7 +51,7 @@ def test_basic_beam_attenuation():
     pmom[0, 0] = 1.0  # Normalization
     ds.pmom = pmom
 
-    # Set output optical depths (boundaries)
+    # Set output optical thicknesses (boundaries)
     ds.utau = np.array([0.0, 1.0])
 
     # Set beam parameters
@@ -124,7 +124,7 @@ def test_multilayer_atmosphere():
     ds.nphi = 0  # No azimuthal angles
 
     # Set control flags
-    ds.usrtau = True  # User optical depths
+    ds.usrtau = True  # User optical thicknesses
     ds.usrang = False  # No user angles
     ds.lamber = True  # Lambertian bottom boundary
     ds.planck = False  # No thermal emission
@@ -146,8 +146,8 @@ def test_multilayer_atmosphere():
     pmom[0, :] = 1.0  # Normalization for all layers
     ds.pmom = pmom
 
-    # Set output optical depths (layer boundaries)
-    # Cumulative optical depth: 0.0 (top), 0.5, 1.5, 3.5 (bottom)
+    # Set output optical thicknesses (layer boundaries)
+    # Cumulative optical thickness: 0.0 (top), 0.5, 1.5, 3.5 (bottom)
     ds.utau = np.array([0.0, 0.5, 1.5, 3.5])
 
     # Set beam parameters

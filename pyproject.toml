@@ -43,7 +43,7 @@ dev = [
   "ipykernel>=6.31.0",
   "jupyterlab",
   "nanobind>=2.9.2",
-  "nbsphinx>=0.9.0",
+  "myst-nb>=1.0.0",
   "ruff>=0.1.0",
   "sphinx-copybutton>=0.5.2",
   "taskipy>=1.12.0",
@@ -75,6 +75,7 @@ no-build-isolation-package = ["nanodisort"]
 minversion = "7.0"
 addopts = [
   "-ra",
+  "-v",
   "--strict-markers",
   "--strict-config",
   "--showlocals",
