@@ -1868,3 +1868,419 @@ class TestDisort08:
         assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-4, atol=1e-9)
         assert_allclose(ds.flup, expected_flup, rtol=1e-4, atol=1e-9)
         assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-4, atol=1e-9)
+
+
+class TestDisort09:
+    """
+    Test Problem 9: General Emitting/Absorbing/Scattering Medium with Every
+    Computational Layer Different.
+
+    Compare fluxes to Ref. DGIS (de Haan, Bosma, Mooijer, Jabber, Stamnes),
+    Tables VI-VII, beta=0.
+
+    This test examines a 6-layer inhomogeneous medium with:
+    - Each layer having different optical thickness and single-scattering albedo
+    - Three sub-cases covering different phase functions and thermal emission
+
+    Note: In disotest.c ``ncase=1``, so only sub-case 9a is executed by the C
+    test runner. The expected values for 9b and 9c are embedded in the C source
+    but never reached by the loop.
+    """
+
+    def _setup_common(self, ds: DisortState) -> None:
+        """Configure geometry shared by all sub-cases."""
+        ds.nstr = 8
+        ds.nlyr = 6
+        ds.nmom = 8
+        ds.ntau = 5
+        ds.numu = 4
+        ds.nphi = 1
+
+        ds.usrtau = True
+        ds.usrang = True
+        ds.lamber = True
+        ds.onlyfl = False
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+
+    def test_9a(self):
+        """
+        9a: Isotropic scattering, isotropic incident radiation, no thermal emission.
+
+        Compare to Ref. DGIS, Tables VI-VII, beta=l=0 (multiple inhomogeneous layers).
+        """
+        ds = DisortState()
+        self._setup_common(ds)
+        ds.planck = False
+
+        ds.allocate()
+
+        ds.dtauc = np.arange(1, 7, dtype=float)
+        ds.ssalb = np.array([0.6 + lc * 0.05 for lc in range(1, 7)], dtype=np.float64)
+        ds.pmom = np.tile(pf.isotropic(ds.nmom).reshape(-1, 1), (1, ds.nlyr))
+        ds.utau = np.array([0.0, 1.05, 2.1, 6.0, 21.0])
+        ds.umu = np.array([-1.0, -0.2, 0.2, 1.0])
+        ds.phi = np.array([60.0])
+
+        ds.fbeam = 0.0
+        ds.fisot = 1.0 / np.pi
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.albedo = 0.0
+        ds.fluor = 0.0
+
+        ds.solve()
+
+        print("\nTest 9a: DGIS Tables VI-VII, isotropic, beta=l=0")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=1e-9)
+        assert_allclose(
+            ds.rfldn,
+            [1.0, 3.55151e-01, 1.44265e-01, 6.71445e-03, 6.16968e-07],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.flup,
+            [2.27973e-01, 8.75098e-02, 3.61819e-02, 2.19291e-03, 0.0],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.dfdt,
+            [8.82116e-01, 2.32366e-01, 9.33443e-02, 3.92782e-03, 1.02500e-07],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+
+        # uu shape: (numu=4, ntau=5, nphi=1)
+        expected_uu = np.array(
+            [
+                [
+                    [3.18310e-01],
+                    [1.53507e-01],
+                    [7.06614e-02],
+                    [3.72784e-03],
+                    [2.87656e-07],
+                ],
+                [
+                    [3.18310e-01],
+                    [5.09531e-02],
+                    [2.09119e-02],
+                    [1.08815e-03],
+                    [1.05921e-07],
+                ],
+                [[9.98915e-02], [3.67006e-02], [1.48545e-02], [8.83316e-04], [0.0]],
+                [[5.91345e-02], [2.31903e-02], [9.72307e-03], [5.94743e-04], [0.0]],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=1e-9)
+
+    def test_9b(self):
+        """
+        9b: Tabulated DGIS phase function, isotropic incident radiation, no thermal emission.
+
+        Compare to Ref. DGIS, Tables VI-VII, beta=0,l=8 (multiple inhomogeneous layers).
+        """
+        ds = DisortState()
+        self._setup_common(ds)
+        ds.planck = False
+
+        ds.allocate()
+
+        ds.dtauc = np.arange(1, 7, dtype=float)
+        ds.ssalb = np.array([0.6 + lc * 0.05 for lc in range(1, 7)], dtype=np.float64)
+
+        # DGIS tabulated phase function moments (same for all layers)
+        pmom_single = np.array(
+            [
+                1.0,
+                2.00916 / 3.0,
+                1.56339 / 5.0,
+                0.67407 / 7.0,
+                0.22215 / 9.0,
+                0.04725 / 11.0,
+                0.00671 / 13.0,
+                0.00068 / 15.0,
+                0.00005 / 17.0,
+            ]
+        )
+        ds.pmom = np.tile(pmom_single.reshape(-1, 1), (1, ds.nlyr))
+
+        ds.utau = np.array([0.0, 1.05, 2.1, 6.0, 21.0])
+        ds.umu = np.array([-1.0, -0.2, 0.2, 1.0])
+        ds.phi = np.array([60.0])
+
+        ds.fbeam = 0.0
+        ds.fisot = 1.0 / np.pi
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.albedo = 0.0
+        ds.fluor = 0.0
+
+        ds.solve()
+
+        print("\nTest 9b: DGIS Tables VI-VII, tabulated phase function, beta=0,l=8")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=1e-9)
+        assert_allclose(
+            ds.rfldn,
+            [1.0, 4.52357e-01, 2.36473e-01, 2.76475e-02, 7.41853e-05],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.flup,
+            [1.00079e-01, 4.52014e-02, 2.41941e-02, 4.16016e-03, 0.0],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.dfdt,
+            [8.04577e-01, 2.55330e-01, 1.30976e-01, 1.36227e-02, 1.22022e-05],
+            rtol=1e-4,
+            atol=1e-9,
+        )
+
+        # uu shape: (numu=4, ntau=5, nphi=1)
+        expected_uu = np.array(
+            [
+                [
+                    [3.18310e-01],
+                    [1.96609e-01],
+                    [1.15478e-01],
+                    [1.46177e-02],
+                    [3.37742e-05],
+                ],
+                [
+                    [3.18310e-01],
+                    [5.92369e-02],
+                    [3.01809e-02],
+                    [3.85590e-03],
+                    [1.20858e-05],
+                ],
+                [[7.39198e-02], [3.00230e-02], [1.52672e-02], [2.38301e-03], [0.0]],
+                [[1.32768e-02], [7.05566e-03], [4.06932e-03], [7.77890e-04], [0.0]],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=1e-9)
+
+    def test_9c(self):
+        """
+        9c: Generalisation of 9a with full complexity: thermal emission, HG phase
+        functions per layer, beam + isotropic + thermal sources, non-zero albedo,
+        multiple azimuth angles.
+        """
+        ds = DisortState()
+        self._setup_common(ds)
+        ds.nphi = 3
+        ds.planck = True
+        ds.wvnmlo = 999.0
+        ds.wvnmhi = 1000.0
+
+        ds.allocate()
+
+        ds.dtauc = np.arange(1, 7, dtype=float)
+        ds.ssalb = (0.6 + np.arange(1, 7) * 0.05).astype(np.float64)
+
+        # HG phase function per layer: gg = lc/7 for lc = 1..6
+        pmom = np.zeros((ds.nmom + 1, ds.nlyr))
+        for lc in range(1, ds.nlyr + 1):
+            gg = lc / 7.0
+            pmom[:, lc - 1] = pf.henyey_greenstein(gg, ds.nmom)
+        ds.pmom = pmom
+
+        ds.utau = np.array([0.0, 1.05, 2.1, 6.0, 21.0])
+        ds.umu = np.array([-1.0, -0.2, 0.2, 1.0])
+        ds.phi = np.array([60.0, 120.0, 180.0])
+        ds.temper = np.array([600.0] + [600.0 + lc * 10.0 for lc in range(1, 7)])
+
+        ds.fbeam = np.pi
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 1.0
+        ds.albedo = 0.5
+        ds.fluor = 0.0
+        ds.btemp = 700.0
+        ds.ttemp = 550.0
+        ds.temis = 1.0
+
+        ds.solve()
+
+        print("\nTest 9c: Full complexity (thermal + HG + beam + isotropic)")
+        print(f"  rfldir: {ds.rfldir}")
+        print(f"  rfldn:  {ds.rfldn}")
+        print(f"  flup:   {ds.flup}")
+        print(f"  dfdt:   {ds.dfdt}")
+
+        assert_allclose(
+            ds.rfldir,
+            [1.57080e00, 1.92354e-01, 2.35550e-02, 9.65131e-06, 9.03133e-19],
+            rtol=1e-3,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.rfldn,
+            [6.09217e00, 4.97279e00, 4.46616e00, 4.22731e00, 4.73767e00],
+            rtol=1e-3,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.flup,
+            [4.68414e00, 4.24381e00, 4.16941e00, 4.30667e00, 5.11524e00],
+            rtol=1e-3,
+            atol=1e-9,
+        )
+        assert_allclose(
+            ds.dfdt,
+            [3.49563e00, 8.81206e-01, 3.50053e-01, 1.93471e-02, 7.15349e-02],
+            rtol=1e-3,
+            atol=1e-9,
+        )
+
+        # uu shape: (numu=4, ntau=5, nphi=3); phi order: [60, 120, 180]
+        expected_uu = np.array(
+            [
+                [  # iu=0, umu=-1
+                    [1.93920, 1.93920, 1.93920],
+                    [1.66764, 1.66764, 1.66764],
+                    [1.48511, 1.48511, 1.48511],
+                    [1.34514, 1.34514, 1.34514],
+                    [1.48927, 1.48927, 1.48927],
+                ],
+                [  # iu=1, umu=-0.2
+                    [1.93920, 1.93920, 1.93920],
+                    [1.44453, 1.42925, 1.42444],
+                    [1.35009, 1.34587, 1.34469],
+                    [1.35131, 1.35129, 1.35128],
+                    [1.54270, 1.54270, 1.54270],
+                ],
+                [  # iu=2, umu=0.2
+                    [1.61855, 1.57895, 1.56559],
+                    [1.38339, 1.37317, 1.37034],
+                    [1.33079, 1.32921, 1.32873],
+                    [1.35980, 1.35979, 1.35979],
+                    [1.62823, 1.62823, 1.62823],
+                ],
+                [  # iu=3, umu=1
+                    [1.43872, 1.43872, 1.43872],
+                    [1.33890, 1.33890, 1.33890],
+                    [1.32794, 1.32794, 1.32794],
+                    [1.37918, 1.37918, 1.37918],
+                    [1.62823, 1.62823, 1.62823],
+                ],
+            ]
+        )
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+
+
+class TestDisort10:
+    """
+    Test Problem 10: Compare ``usrang=True`` vs ``usrang=False``.
+
+    Takes Problem 9c (the most general case) with only 4 streams. Runs DISORT
+    twice: once with user-specified polar angles set to the Gauss-Legendre
+    quadrature points (``usrang=True``), and once letting DISORT use those
+    quadrature angles internally (``usrang=False``). The flux outputs must agree.
+    """
+
+    def _setup_common(self, ds: DisortState) -> None:
+        """Configure geometry shared by both sub-cases (like 9c with 4 streams)."""
+        ds.nstr = 4
+        ds.nlyr = 6
+        ds.nmom = 4  # nmom = nstr
+        ds.ntau = 3
+        ds.nphi = 2
+
+        ds.usrtau = True
+        ds.lamber = True
+        ds.planck = True
+        ds.onlyfl = False
+        ds.quiet = True
+        ds.intensity_correction = True
+        ds.old_intensity_correction = True
+        ds.spher = False
+        ds.wvnmlo = 999.0
+        ds.wvnmhi = 1000.0
+
+    def _set_arrays(self, ds: DisortState) -> None:
+        """Set shared optical property and boundary arrays."""
+        ds.dtauc = np.arange(1, 7, dtype=float)
+        ds.ssalb = np.array([0.6 + lc * 0.05 for lc in range(1, 7)], dtype=np.float64)
+
+        pmom = np.zeros((ds.nmom + 1, ds.nlyr))
+        for lc in range(1, ds.nlyr + 1):
+            gg = lc / 7.0
+            pmom[:, lc - 1] = pf.henyey_greenstein(gg, ds.nmom)
+        ds.pmom = pmom
+
+        ds.utau = np.array([0.0, 2.1, 21.0])
+        ds.phi = np.array([60.0, 120.0])
+        ds.temper = np.array([600.0] + [600.0 + lc * 10.0 for lc in range(1, 7)])
+
+        ds.fbeam = np.pi
+        ds.umu0 = 0.5
+        ds.phi0 = 0.0
+        ds.fisot = 1.0
+        ds.albedo = 0.5
+        ds.fluor = 0.0
+        ds.btemp = 700.0
+        ds.ttemp = 550.0
+        ds.temis = 1.0
+
+    def test_10(self):
+        """
+        Verify that ``usrang=True`` with quadrature angles gives identical fluxes
+        to ``usrang=False`` (which uses those angles internally).
+
+        The 4-stream Gauss-Legendre quadrature points are:
+        umu = ±0.211324871, ±0.788675129
+        """
+        # 10a: usrang=True with the 4-stream quadrature angles
+        ds_a = DisortState()
+        self._setup_common(ds_a)
+        ds_a.usrang = True
+        ds_a.numu = 4
+
+        ds_a.allocate()
+        self._set_arrays(ds_a)
+        ds_a.umu = np.array([-0.788675129, -0.211324871, 0.211324871, 0.788675129])
+
+        ds_a.solve()
+
+        # 10b: usrang=False — DISORT uses quadrature angles internally
+        ds_b = DisortState()
+        self._setup_common(ds_b)
+        ds_b.usrang = False
+        ds_b.numu = 0
+
+        ds_b.allocate()
+        self._set_arrays(ds_b)
+
+        ds_b.solve()
+
+        print("\nTest 10a (usrang=True) fluxes:")
+        print(f"  rfldir: {ds_a.rfldir}")
+        print(f"  rfldn:  {ds_a.rfldn}")
+        print(f"  flup:   {ds_a.flup}")
+        print(f"  dfdt:   {ds_a.dfdt}")
+        print("Test 10b (usrang=False) fluxes:")
+        print(f"  rfldir: {ds_b.rfldir}")
+        print(f"  rfldn:  {ds_b.rfldn}")
+        print(f"  flup:   {ds_b.flup}")
+        print(f"  dfdt:   {ds_b.dfdt}")
+
+        assert_allclose(ds_b.rfldir, ds_a.rfldir, rtol=1e-5, atol=1e-12)
+        assert_allclose(ds_b.rfldn, ds_a.rfldn, rtol=1e-5, atol=1e-12)
+        assert_allclose(ds_b.flup, ds_a.flup, rtol=1e-5, atol=1e-12)
+        assert_allclose(ds_b.dfdt, ds_a.dfdt, rtol=1e-5, atol=1e-12)
