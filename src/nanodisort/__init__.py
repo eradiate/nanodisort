@@ -65,6 +65,7 @@ class DisortState(_DisortState):
     ntau: int
     numu: int
     nphi: int
+    nphase: int
     usrtau: bool
     usrang: bool
     lamber: bool
@@ -72,6 +73,7 @@ class DisortState(_DisortState):
     onlyfl: bool
     quiet: bool
     intensity_correction: bool
+    old_intensity_correction: bool
     spher: bool
     fbeam: float
     umu0: float
@@ -88,6 +90,8 @@ class DisortState(_DisortState):
     dtauc: NDArray[np.float64]
     ssalb: NDArray[np.float64]
     pmom: NDArray[np.float64]
+    mu_phase: NDArray[np.float64]
+    phase: NDArray[np.float64]
     umu: NDArray[np.float64]
     phi: NDArray[np.float64]
     utau: NDArray[np.float64]
@@ -105,7 +109,6 @@ class DisortState(_DisortState):
     uum: NDArray[np.float64]
     albmed: NDArray[np.float64]
     trnmed: NDArray[np.float64]
-    old_intensity_correction: bool
     brdf_type: BRDFType
 
     def __init__(self) -> None:
@@ -133,6 +136,7 @@ class DisortState(_DisortState):
             "ntau",
             "numu",
             "nphi",
+            "nphase",
         ]
         flags = [
             "usrtau",
@@ -142,6 +146,7 @@ class DisortState(_DisortState):
             "onlyfl",
             "quiet",
             "intensity_correction",
+            "old_intensity_correction",
             "spher",
         ]
         boundary_conditions = [

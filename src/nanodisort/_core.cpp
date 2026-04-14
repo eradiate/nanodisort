@@ -241,6 +241,7 @@ public:
     DEFINE_INT_PROPERTY(ntau, ds.ntau)
     DEFINE_INT_PROPERTY(numu, ds.numu)
     DEFINE_INT_PROPERTY(nphi, ds.nphi)
+    DEFINE_INT_PROPERTY(nphase, ds.nphase)
 
     // Control flags
     DEFINE_FLAG_PROPERTY(usrtau, ds.flag.usrtau)
@@ -273,6 +274,50 @@ public:
     // Array setters/getters - require allocation first
     DEFINE_ARRAY_PROPERTY(dtauc, ds.dtauc, ds.nlyr)
     DEFINE_ARRAY_PROPERTY(ssalb, ds.ssalb, ds.nlyr)
+
+    // Buras-Emde correction arrays (allocated only when old_intensity_correction=False and nphase>=1)
+    void set_mu_phase(ArrayD1 arr) {
+        check_allocated();
+        if (!ds.mu_phase)
+            throw std::runtime_error(
+                "mu_phase not allocated. Set old_intensity_correction=False "
+                "and nphase >= 1 before allocate().");
+        check_array_size(arr, ds.nphase, "mu_phase");
+        std::copy_n(arr.data(), ds.nphase, ds.mu_phase);
+    }
+    auto get_mu_phase() {
+        check_allocated();
+        if (!ds.mu_phase)
+            throw std::runtime_error(
+                "mu_phase not allocated. Set old_intensity_correction=False "
+                "and nphase >= 1 before allocate().");
+        size_t shape[1] = {static_cast<size_t>(ds.nphase)};
+        return nb::ndarray<nb::numpy, double, nb::ndim<1>>(ds.mu_phase, 1, shape);
+    }
+
+    void set_phase(ArrayD2 arr) {
+        check_allocated();
+        if (!ds.phase)
+            throw std::runtime_error(
+                "phase not allocated. Set old_intensity_correction=False "
+                "and nphase >= 1 before allocate().");
+        if ((int)arr.shape(0) != ds.nlyr || (int)arr.shape(1) != ds.nphase)
+            throw std::runtime_error(
+                "phase array shape mismatch. Expected ("
+                + std::to_string(ds.nlyr) + ", " + std::to_string(ds.nphase) + ")");
+        std::copy_n(arr.data(), ds.nlyr * ds.nphase, ds.phase);
+    }
+    auto get_phase() {
+        check_allocated();
+        if (!ds.phase)
+            throw std::runtime_error(
+                "phase not allocated. Set old_intensity_correction=False "
+                "and nphase >= 1 before allocate().");
+        size_t shape[2] = {static_cast<size_t>(ds.nlyr), static_cast<size_t>(ds.nphase)};
+        int64_t strides[2] = {static_cast<int64_t>(ds.nphase), 1};
+        return nb::ndarray<nb::numpy, double, nb::ndim<2>>(
+            ds.phase, 2, shape, nb::handle(), strides);
+    }
 
     // Accepts any contiguous array; nanobind converts to Fortran order if needed
     void set_pmom(ArrayD2F arr) {
@@ -884,6 +929,7 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(ntau, "Number of user optical thicknesses.")
         BIND_PROPERTY_RW(numu, "Number of user polar angles.")
         BIND_PROPERTY_RW(nphi, "Number of user azimuth angles.")
+        BIND_PROPERTY_RW(nphase, "Number of phase angle grid points for Buras-Emde correction.")
         // Control flags
         BIND_PROPERTY_RW(usrtau, "Return radiant quantities at user-specified optical thicknesses.")
         BIND_PROPERTY_RW(usrang, "Return radiant quantities at user-specified polar angles.")
@@ -913,6 +959,8 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(dtauc, "Optical thicknesses of computational layers [nlyr].")
         BIND_PROPERTY_RW(ssalb, "Single-scattering albedo of computational layers [nlyr].")
         BIND_PROPERTY_RW(pmom, "Phase function moments [nmom_nstr+1, nlyr].")
+        BIND_PROPERTY_RW(mu_phase, "Phase angle cosines [nphase] for Buras-Emde correction.")
+        BIND_PROPERTY_RW(phase, "Phase function values [nlyr, nphase] for Buras-Emde correction.")
         // Other input arrays
         BIND_PROPERTY_RW(umu, "Polar angle cosines [numu].")
         BIND_PROPERTY_RW(phi, "Azimuthal angles [degrees] [nphi].")

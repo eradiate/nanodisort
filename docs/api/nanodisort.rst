@@ -31,6 +31,7 @@
     .. autoattribute:: ntau
     .. autoattribute:: numu
     .. autoattribute:: nphi
+    .. autoattribute:: nphase
 
     .. rubric:: Boundary conditions
         :heading-level: 3
@@ -59,6 +60,8 @@
     .. autoattribute:: dtauc
     .. autoattribute:: ssalb
     .. autoattribute:: pmom
+    .. autoattribute:: phase
+    .. autoattribute:: mu_phase
 
     .. rubric:: Other input arrays
         :heading-level: 3
