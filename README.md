@@ -43,25 +43,35 @@ from nanodisort.utils import phase_functions as pf
 
 # Configure dimensions and allocate
 ds = nd.DisortState()
-ds.nstr = 16  # number of streams
-ds.nlyr = 1   # number of layers
-ds.nmom = 16  # phase function moments (>= nstr)
-ds.ntau = 2   # output optical depth levels
-ds.numu = 6   # output polar angles
-ds.nphi = 1   # output azimuthal angles
+ds.nstr = 16     # number of streams
+ds.nlyr = 1      # number of layers
+ds.nmom = 16     # phase function moments (>= nstr)
+ds.ntau = 2      # output optical depth levels
+ds.numu = 6      # output polar angles
+ds.nphi = 1      # output azimuthal angles
+ds.nphase = 100  # phase-angle grid points for the Buras-Emde correction
 ds.allocate()
 
 # Flags
-ds.usrtau = True            # user-specified output levels
-ds.usrang = True            # user-specified viewing angles
-ds.lamber = True            # Lambertian lower boundary
-ds.quiet = True             # suppress C-level output
-ds.intensity_correction = True  # Nakajima-Tanaka correction
+ds.usrtau = True                     # user-specified output levels
+ds.usrang = True                     # user-specified viewing angles
+ds.lamber = True                     # Lambertian lower boundary
+ds.quiet = True                      # suppress C-level output
+ds.intensity_correction = True       # enable intensity correction
+ds.old_intensity_correction = False  # use the Buras-Emde algorithm (default)
 
 # Optical properties
 ds.dtauc = np.array([0.1])          # extinction optical thickness
 ds.ssalb = np.array([1.0])          # single-scattering albedo (pure scattering)
 ds.pmom = pf.rayleigh(ds.nmom).reshape(-1, 1)  # Rayleigh phase function moments
+
+# Buras-Emde correction: tabulate the phase function on a scattering-angle grid.
+# mu_phase holds the scattering-angle cosines, shape (nphase,); phase holds the
+# phase function values per layer, shape (nlyr, nphase). Here we use the analytic
+# Rayleigh phase function P(mu) = 0.75 * (1 + mu**2).
+mu_phase = np.linspace(-1.0, 1.0, ds.nphase)
+ds.mu_phase = mu_phase
+ds.phase = (0.75 * (1.0 + mu_phase**2)).reshape(1, -1)
 
 # Output levels and viewing angles
 ds.utau = np.array([0.0, 0.1])                    # TOA and surface
@@ -110,6 +120,6 @@ If you use nanodisort in your research, please cite the [CDISORT paper](https://
     license = {GPL-3.0-or-later},
     title = {{nanodisort}},
     url = {https://github.com/eradiate/nanodisort},
-    version = {0.1.0}
+    version = {0.2.0}
 }
 ```
