@@ -212,7 +212,7 @@ def test_multilayer_atmosphere():
 
 
 def test_property_access():
-    """Test that all properties can be accessed correctly."""
+    """Test property round-trips through the C++ binding layer."""
     ds = DisortState()
 
     # Test dimension properties
@@ -227,13 +227,13 @@ def test_property_access():
 
     # Test flag properties
     ds.usrtau = True
-    assert ds.usrtau
+    assert ds.usrtau is True
 
     ds.lamber = False
-    assert not ds.lamber
+    assert ds.lamber is False
 
     ds.planck = True
-    assert ds.planck
+    assert ds.planck is True
 
     # Test boundary condition properties
     ds.fbeam = 3.14159

@@ -19,8 +19,10 @@ class PhaseFunction(enum.IntEnum):
     ISOTROPIC = 1  #: Isotropic scattering
     RAYLEIGH = 2  #: Rayleigh scattering
     HENYEY_GREENSTEIN = 3  #: Henyey-Greenstein
-    HAZE_GARCIA_SIEWERT = 4  #: Haze L (:cite:t:`Garcia1985BenchmarkResultsRT` table 10)
-    CLOUD_GARCIA_SIEWERT = 5  #: Cloud C.1 (:cite:t:`Garcia1985BenchmarkResultsRT` table 17)
+    #: Haze L (:cite:t:`Garcia1985BenchmarkResultsRT` table 10)
+    HAZE_GARCIA_SIEWERT = 4
+    #: Cloud C.1 (:cite:t:`Garcia1985BenchmarkResultsRT` table 17)
+    CLOUD_GARCIA_SIEWERT = 5
 
 
 # Cloud C.1 Legendre moments (from cdisort.c)
@@ -460,20 +462,20 @@ def getmom(iphas: PhaseFunction, gg: float, nmom: int) -> NDArray[np.float64]:
         # Henyey-Greenstein: pmom[k] = gg^k
         if gg <= -1.0 or gg >= 1.0:
             raise ValueError(f"gg must be in (-1, 1), got {gg}")
-        for k in range(1, nmom + 1):
-            pmom[k] = gg**k
+        pmom[1:] = gg ** np.arange(1, nmom + 1)
 
     elif iphas == PhaseFunction.HAZE_GARCIA_SIEWERT:
-        # Haze-L phase function
+        # Haze-L phase function. Tabulated moments are normalized by (2*l + 1)
+        # with l = k + 1 the Legendre order.
         n_available = min(len(HAZELM), nmom)
-        for k in range(n_available):
-            pmom[k + 1] = HAZELM[k] / (2 * (k + 1) + 1)
+        l_order = np.arange(1, n_available + 1)
+        pmom[1 : n_available + 1] = HAZELM[:n_available] / (2 * l_order + 1)
 
     elif iphas == PhaseFunction.CLOUD_GARCIA_SIEWERT:
-        # Cloud C.1 phase function
+        # Cloud C.1 phase function (same normalization as Haze-L).
         n_available = min(len(CLDMOM), nmom)
-        for k in range(n_available):
-            pmom[k + 1] = CLDMOM[k] / (2 * (k + 1) + 1)
+        l_order = np.arange(1, n_available + 1)
+        pmom[1 : n_available + 1] = CLDMOM[:n_available] / (2 * l_order + 1)
 
     else:
         raise ValueError(f"Unknown phase function type: {iphas}")

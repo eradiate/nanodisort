@@ -33,48 +33,26 @@ def test_solve_without_optical_properties():
         disort.solve()
 
 
-def test_invalid_nstr_odd():
-    """Test that invalid nstr (odd number) is caught."""
+@pytest.mark.parametrize(
+    "nstr, nlyr, nmom, match",
+    [
+        (7, 6, 8, "nstr must be positive and even"),  # odd nstr
+        (3, 1, 0, "nstr must be positive and even"),  # odd nstr, informative message
+        (0, 1, 0, "nstr must be positive and even"),  # nstr < 2
+        (8, 0, 8, "nlyr must be positive"),  # nlyr == 0
+    ],
+)
+def test_invalid_dimensions(nstr, nlyr, nmom, match):
+    """Test that invalid solver dimensions are caught at allocation."""
     disort = nd.DisortState()
-    disort.nstr = 7  # Invalid: must be even
-    disort.nlyr = 6
-    disort.nmom = 8
-    disort.ntau = 5
-    disort.numu = 4
-    disort.nphi = 3
-
-    # Should raise during allocation
-    with pytest.raises(RuntimeError, match="nstr must be positive and even"):
-        disort.allocate()
-
-
-def test_invalid_nstr_too_small():
-    """Test that nstr < 2 is caught."""
-    disort = nd.DisortState()
-    disort.nstr = 0
-    disort.nlyr = 1
-    disort.nmom = 0
+    disort.nstr = nstr
+    disort.nlyr = nlyr
+    disort.nmom = nmom
     disort.ntau = 1
     disort.numu = 0
     disort.nphi = 0
 
-    # Should raise during allocation
-    with pytest.raises(RuntimeError, match="nstr must be positive and even"):
-        disort.allocate()
-
-
-def test_invalid_nlyr_zero():
-    """Test that nlyr = 0 is caught."""
-    disort = nd.DisortState()
-    disort.nstr = 8
-    disort.nlyr = 0  # Invalid
-    disort.nmom = 8
-    disort.ntau = 1
-    disort.numu = 0
-    disort.nphi = 0
-
-    # Should raise during allocation
-    with pytest.raises(RuntimeError, match="nlyr must be positive"):
+    with pytest.raises(RuntimeError, match=match):
         disort.allocate()
 
 
@@ -136,24 +114,6 @@ def test_valid_configuration_works():
     assert np.all(np.isfinite(rfldir))
 
 
-def test_error_message_preserved():
-    """Test that dimension validation error messages are clear and informative."""
-    disort = nd.DisortState()
-    disort.nstr = 3  # Invalid: must be even
-    disort.nlyr = 1
-    disort.nmom = 0
-    disort.ntau = 1
-    disort.numu = 0
-    disort.nphi = 0
-
-    # The exception should contain clear information about the error
-    with pytest.raises(RuntimeError) as exc_info:
-        disort.allocate()
-
-    # Verify the exception message is informative
-    assert "nstr must be positive and even" in str(exc_info.value)
-
-
 def test_multiple_errors_sequential():
     """Test that multiple sequential error conditions are handled correctly."""
     # First error - invalid optical properties
@@ -205,8 +165,15 @@ def test_multiple_errors_sequential():
         disort2.solve()
 
 
-def test_invalid_optical_depth():
-    """Test that invalid optical thickness values are caught."""
+@pytest.mark.parametrize(
+    "dtauc, ssalb",
+    [
+        (-0.5, 0.9),  # negative optical thickness
+        (0.5, 1.5),  # single scattering albedo > 1
+    ],
+)
+def test_invalid_optical_properties(dtauc, ssalb):
+    """Test that invalid optical property values are caught during solve."""
     disort = nd.DisortState()
     disort.nstr = 8
     disort.nlyr = 1
@@ -223,45 +190,8 @@ def test_invalid_optical_depth():
     disort.allocate()
 
     # Set optical properties
-    disort.dtauc = np.array([-0.5])  # Invalid: negative optical thickness
-    disort.ssalb = np.array([0.9])
-    pmom = np.zeros((disort.nmom + 1, disort.nlyr))
-    pmom[0, :] = 1.0
-    disort.pmom = pmom
-
-    disort.utau = np.array([0.0, 0.5])
-
-    # Set boundary conditions
-    disort.fbeam = 1.0
-    disort.umu0 = 0.5
-    disort.phi0 = 0.0
-    disort.albedo = 0.0
-
-    # Should raise during solve
-    with pytest.raises(RuntimeError, match="DISORT error"):
-        disort.solve()
-
-
-def test_invalid_single_scatter_albedo():
-    """Test that invalid single scatter albedo values are caught."""
-    disort = nd.DisortState()
-    disort.nstr = 8
-    disort.nlyr = 1
-    disort.nmom = 8
-    disort.ntau = 2
-    disort.numu = 0
-    disort.nphi = 0
-
-    disort.usrtau = True
-    disort.usrang = False
-    disort.onlyfl = True
-    disort.lamber = True
-
-    disort.allocate()
-
-    # Set optical properties
-    disort.dtauc = np.array([0.5])
-    disort.ssalb = np.array([1.5])  # Invalid: > 1
+    disort.dtauc = np.array([dtauc])
+    disort.ssalb = np.array([ssalb])
     pmom = np.zeros((disort.nmom + 1, disort.nlyr))
     pmom[0, :] = 1.0
     disort.pmom = pmom

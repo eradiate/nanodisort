@@ -44,25 +44,40 @@ def make_single_layer_config():
     }
 
 
+# Geometry, flag and scalar boundary attributes shared by DisortState and
+# BatchSolver (i.e. everything except the per-batch optical-property arrays).
+_SOLVER_SCALAR_KEYS = (
+    "nstr",
+    "nlyr",
+    "nmom",
+    "ntau",
+    "numu",
+    "nphi",
+    "usrtau",
+    "usrang",
+    "lamber",
+    "planck",
+    "onlyfl",
+    "quiet",
+    "umu0",
+    "phi0",
+    "fisot",
+    "fluor",
+)
+
+
+def configure_batch_solver(solver, config):
+    """Apply shared scalar configuration and ``utau`` to a BatchSolver."""
+    for key in _SOLVER_SCALAR_KEYS:
+        setattr(solver, key, config[key])
+    solver.set_utau(config["utau"])
+
+
 def solve_single(config, dtauc, ssalb, pmom, fbeam=np.pi, albedo=0.0):
     """Solve a single problem with DisortState and return flux outputs."""
     ds = DisortState()
-    ds.nstr = config["nstr"]
-    ds.nlyr = config["nlyr"]
-    ds.nmom = config["nmom"]
-    ds.ntau = config["ntau"]
-    ds.numu = config["numu"]
-    ds.nphi = config["nphi"]
-    ds.usrtau = config["usrtau"]
-    ds.usrang = config["usrang"]
-    ds.lamber = config["lamber"]
-    ds.planck = config["planck"]
-    ds.onlyfl = config["onlyfl"]
-    ds.quiet = config["quiet"]
-    ds.umu0 = config["umu0"]
-    ds.phi0 = config["phi0"]
-    ds.fisot = config["fisot"]
-    ds.fluor = config["fluor"]
+    for key in _SOLVER_SCALAR_KEYS:
+        setattr(ds, key, config[key])
     ds.fbeam = fbeam
     ds.albedo = albedo
 
@@ -121,23 +136,7 @@ class TestBatchMatchesSequential:
 
         # Solve with BatchSolver
         solver = BatchSolver(nthreads=4)
-        solver.nstr = config["nstr"]
-        solver.nlyr = config["nlyr"]
-        solver.nmom = config["nmom"]
-        solver.ntau = config["ntau"]
-        solver.numu = config["numu"]
-        solver.nphi = config["nphi"]
-        solver.usrtau = config["usrtau"]
-        solver.usrang = config["usrang"]
-        solver.lamber = config["lamber"]
-        solver.planck = config["planck"]
-        solver.onlyfl = config["onlyfl"]
-        solver.quiet = config["quiet"]
-        solver.umu0 = config["umu0"]
-        solver.phi0 = config["phi0"]
-        solver.fisot = config["fisot"]
-        solver.fluor = config["fluor"]
-        solver.set_utau(config["utau"])
+        configure_batch_solver(solver, config)
 
         solver.allocate(nbatch)
         solver.set_dtauc(dtauc_batch)
@@ -210,23 +209,7 @@ class TestBatchMatchesSequential:
             sequential_results.append(result)
 
         solver = BatchSolver(nthreads=2)
-        solver.nstr = config["nstr"]
-        solver.nlyr = config["nlyr"]
-        solver.nmom = config["nmom"]
-        solver.ntau = config["ntau"]
-        solver.numu = config["numu"]
-        solver.nphi = config["nphi"]
-        solver.usrtau = config["usrtau"]
-        solver.usrang = config["usrang"]
-        solver.lamber = config["lamber"]
-        solver.planck = config["planck"]
-        solver.onlyfl = config["onlyfl"]
-        solver.quiet = config["quiet"]
-        solver.umu0 = config["umu0"]
-        solver.phi0 = config["phi0"]
-        solver.fisot = config["fisot"]
-        solver.fluor = config["fluor"]
-        solver.set_utau(config["utau"])
+        configure_batch_solver(solver, config)
 
         solver.allocate(nbatch)
         solver.set_dtauc(dtauc_batch)
@@ -267,23 +250,7 @@ class TestBatchIdenticalInputs:
         pmom_batch[0, :, :] = 1.0
 
         solver = BatchSolver(nthreads=4)
-        solver.nstr = config["nstr"]
-        solver.nlyr = config["nlyr"]
-        solver.nmom = config["nmom"]
-        solver.ntau = config["ntau"]
-        solver.numu = config["numu"]
-        solver.nphi = config["nphi"]
-        solver.usrtau = config["usrtau"]
-        solver.usrang = config["usrang"]
-        solver.lamber = config["lamber"]
-        solver.planck = config["planck"]
-        solver.onlyfl = config["onlyfl"]
-        solver.quiet = config["quiet"]
-        solver.umu0 = config["umu0"]
-        solver.phi0 = config["phi0"]
-        solver.fisot = config["fisot"]
-        solver.fluor = config["fluor"]
-        solver.set_utau(config["utau"])
+        configure_batch_solver(solver, config)
 
         solver.allocate(nbatch)
         solver.set_dtauc(dtauc_batch)
@@ -327,23 +294,7 @@ class TestBatchEdgeCases:
         ref = solve_single(config, dtauc[0], ssalb[0], pmom_single)
 
         solver = BatchSolver()
-        solver.nstr = config["nstr"]
-        solver.nlyr = config["nlyr"]
-        solver.nmom = config["nmom"]
-        solver.ntau = config["ntau"]
-        solver.numu = config["numu"]
-        solver.nphi = config["nphi"]
-        solver.usrtau = config["usrtau"]
-        solver.usrang = config["usrang"]
-        solver.lamber = config["lamber"]
-        solver.planck = config["planck"]
-        solver.onlyfl = config["onlyfl"]
-        solver.quiet = config["quiet"]
-        solver.umu0 = config["umu0"]
-        solver.phi0 = config["phi0"]
-        solver.fisot = config["fisot"]
-        solver.fluor = config["fluor"]
-        solver.set_utau(config["utau"])
+        configure_batch_solver(solver, config)
 
         solver.allocate(1)
         solver.set_dtauc(dtauc)
