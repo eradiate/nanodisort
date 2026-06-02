@@ -197,7 +197,7 @@ class DisortState(_DisortState):
                 ]
             )
 
-        body = "\n".join([f"  {'allocated':<{pad}} = {self.allocated},"] + sections)
+        body = "\n".join([f"  {'allocated':<{pad}} = {self.allocated},", *sections])
         print("\n".join(["DisortState[", body, "]"]))
 
 
@@ -313,4 +313,4 @@ class BRDFType(enum.IntEnum):
     HAPKE = 4
 
 
-__all__ = ["__version__", "BatchSolver", "BRDFType", "DisortState"]
+__all__ = ["BRDFType", "BatchSolver", "DisortState", "__version__"]
