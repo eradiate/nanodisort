@@ -40,7 +40,7 @@ class TestDisort01:
     - Sources: beam, isotropic
     """
 
-    _TEST_01_PARAMS = {
+    _TEST_01_PARAMS = {  # noqa: RUF012
         # Case 1a: tau=0.03125, ssalb=0.2, beam source
         "a": {
             "utau": 0.03125,
@@ -311,7 +311,7 @@ class TestDisort02:
     - Single scattering albedos: 0.5, 1.0
     """
 
-    _TEST_02_PARAMS = {
+    _TEST_02_PARAMS = {  # noqa: RUF012
         # Case 2a: tau=0.2, ssalb=0.5
         "a": {
             "utau": 0.2,
@@ -524,7 +524,7 @@ class TestDisort03:
     - nmom=32 (more moments than nstr=16)
     """
 
-    _TEST_03_PARAMS = {
+    _TEST_03_PARAMS = {  # noqa: RUF012
         "a": {
             "utau": 1.0,
             "expected_rfldir": [3.14159, 1.15573],
@@ -688,7 +688,7 @@ class TestDisort04:
     - Multiple azimuthal angles (case c)
     """
 
-    _TEST_04_PARAMS = {
+    _TEST_04_PARAMS = {  # noqa: RUF012
         # Case 4a: tau=1.0, Haze-L, ssalb=1.0, normal incidence (Table 12)
         "a": {
             "ssalb": 1.0,
@@ -852,7 +852,7 @@ class TestDisort05:
     - Multiple output levels within the layer
     """
 
-    _TEST_05_PARAMS = {
+    _TEST_05_PARAMS = {  # noqa: RUF012
         # Case 5a: tau=64.0, Cloud C.1, ssalb=1.0 (Table 19)
         "a": {
             "ssalb": 1.0,
@@ -990,7 +990,7 @@ class TestDisort06:
     internal). 8 sub-cases total.
     """
 
-    _TEST_06_PARAMS = {
+    _TEST_06_PARAMS = {  # noqa: RUF012
         # Case 6a: transparent medium, beam source, no reflection
         "a": {
             "lamber": True,
@@ -1723,7 +1723,7 @@ class TestDisort08:
     - Isotropic incident radiation (fisot) rather than beam source
     """
 
-    _TEST_08_PARAMS = {
+    _TEST_08_PARAMS = {  # noqa: RUF012
         # Case 8a: 2-layer, dtauc=[0.25,0.25], ssalb=[0.5,0.3] (OS Table 1, Line 4)
         "a": {
             "dtauc": [0.25, 0.25],
@@ -1984,7 +1984,8 @@ class TestDisort09:
 
     def test_9b(self):
         """
-        9b: Tabulated DGIS phase function, isotropic incident radiation, no thermal emission.
+        9b: Tabulated DGIS phase function, isotropic incident radiation, no thermal
+        emission.
 
         Compare to Ref. DGIS, Tables VI-VII, beta=0,l=8 (multiple inhomogeneous layers).
         """

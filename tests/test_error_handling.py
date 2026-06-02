@@ -16,7 +16,9 @@ import nanodisort as nd
 
 
 def test_solve_without_optical_properties():
-    """Test that calling solve without setting optical properties raises an exception."""
+    """
+    Test that calling solve without setting optical properties raises an exception.
+    """
     disort = nd.DisortState()
     disort.nstr = 8
     disort.nlyr = 6

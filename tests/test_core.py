@@ -227,13 +227,13 @@ def test_property_access():
 
     # Test flag properties
     ds.usrtau = True
-    assert ds.usrtau == True
+    assert ds.usrtau
 
     ds.lamber = False
-    assert ds.lamber == False
+    assert not ds.lamber
 
     ds.planck = True
-    assert ds.planck == True
+    assert ds.planck
 
     # Test boundary condition properties
     ds.fbeam = 3.14159

@@ -85,7 +85,9 @@ class TestBatchMatchesSequential:
     """Verify that batch results match sequential single-solve results."""
 
     def test_varying_optical_properties(self):
-        """Batch of N problems with different dtauc/ssalb matches N sequential solves."""
+        """
+        Batch of N problems with different dtauc/ssalb matches N sequential solves.
+        """
         config = make_single_layer_config()
         nbatch = 8
 
@@ -101,9 +103,7 @@ class TestBatchMatchesSequential:
         pmom_single[0, :] = 1.0
 
         # Batch pmom: (nmom_nstr+1, nlyr, nbatch) Fortran-contiguous
-        pmom_batch = np.zeros(
-            (nmom_nstr + 1, config["nlyr"], nbatch), order="F"
-        )
+        pmom_batch = np.zeros((nmom_nstr + 1, config["nlyr"], nbatch), order="F")
         pmom_batch[0, :, :] = 1.0
 
         # Solve sequentially
@@ -156,22 +156,26 @@ class TestBatchMatchesSequential:
 
         for i in range(nbatch):
             np.testing.assert_allclose(
-                batch_rfldir[i], sequential_results[i]["rfldir"],
+                batch_rfldir[i],
+                sequential_results[i]["rfldir"],
                 rtol=1e-14,
                 err_msg=f"rfldir mismatch at batch {i}",
             )
             np.testing.assert_allclose(
-                batch_rfldn[i], sequential_results[i]["rfldn"],
+                batch_rfldn[i],
+                sequential_results[i]["rfldn"],
                 rtol=1e-14,
                 err_msg=f"rfldn mismatch at batch {i}",
             )
             np.testing.assert_allclose(
-                batch_flup[i], sequential_results[i]["flup"],
+                batch_flup[i],
+                sequential_results[i]["flup"],
                 rtol=1e-14,
                 err_msg=f"flup mismatch at batch {i}",
             )
             np.testing.assert_allclose(
-                batch_dfdt[i], sequential_results[i]["dfdt"],
+                batch_dfdt[i],
+                sequential_results[i]["dfdt"],
                 rtol=1e-14,
                 err_msg=f"dfdt mismatch at batch {i}",
             )
@@ -196,8 +200,12 @@ class TestBatchMatchesSequential:
         sequential_results = []
         for i in range(nbatch):
             result = solve_single(
-                config, dtauc_batch[i], ssalb_batch[i], pmom_single,
-                fbeam=fbeam_batch[i], albedo=albedo_batch[i],
+                config,
+                dtauc_batch[i],
+                ssalb_batch[i],
+                pmom_single,
+                fbeam=fbeam_batch[i],
+                albedo=albedo_batch[i],
             )
             sequential_results.append(result)
 
@@ -231,11 +239,13 @@ class TestBatchMatchesSequential:
 
         for i in range(nbatch):
             np.testing.assert_allclose(
-                np.array(solver.rfldir)[i], sequential_results[i]["rfldir"],
+                np.array(solver.rfldir)[i],
+                sequential_results[i]["rfldir"],
                 rtol=1e-14,
             )
             np.testing.assert_allclose(
-                np.array(solver.flup)[i], sequential_results[i]["flup"],
+                np.array(solver.flup)[i],
+                sequential_results[i]["flup"],
                 rtol=1e-14,
             )
 
@@ -347,9 +357,7 @@ class TestBatchEdgeCases:
         np.testing.assert_allclose(
             np.array(solver.rfldir)[0], ref["rfldir"], rtol=1e-14
         )
-        np.testing.assert_allclose(
-            np.array(solver.flup)[0], ref["flup"], rtol=1e-14
-        )
+        np.testing.assert_allclose(np.array(solver.flup)[0], ref["flup"], rtol=1e-14)
 
 
 class TestBatchShapeValidation:
