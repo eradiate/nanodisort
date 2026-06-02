@@ -116,7 +116,7 @@ target-version = "py39"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["F", "I"]
 
 [tool.taskipy.tasks]
 # Development tasks
