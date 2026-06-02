@@ -75,8 +75,8 @@ def _make_batch_solver() -> nd.BatchSolver:
     return solver
 
 
-class BenchmarkBatch:
-    def benchmark_single(self, benchmark):
+class BenchBatch:
+    def bench_single(self, benchmark):
         ds = _make_single_state()
 
         def run():
@@ -89,7 +89,7 @@ class BenchmarkBatch:
 
         benchmark(run)
 
-    def benchmark_batch(self, benchmark):
+    def bench_batch(self, benchmark):
         solver = _make_batch_solver()
 
         def run():
