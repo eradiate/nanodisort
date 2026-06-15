@@ -1,10 +1,15 @@
 # nanodisort
 
-[![PyPI version](https://img.shields.io/pypi/v/nanodisort?color=blue)](https://pypi.org/project/nanodisort)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/eradiate/nanodisort/test.yml?branch=main)](https://github.com/eradiate/nanodisort/actions/workflows/test.yml)
-[![Documentation Status](https://img.shields.io/readthedocs/nanodisort)](https://nanodisort.readthedocs.io/latest)
-[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pypi][pypi-badge]][pypi-url]
+[![ci][ci-badge]][ci-url]
+[![docs][docs-badge]][docs-url]
+
+[pypi-badge]: https://img.shields.io/pypi/v/nanodisort?style=flat-square&color=blue
+[pypi-url]: https://pypi.org/project/nanodisort/
+[ci-badge]: https://img.shields.io/github/actions/workflow/status/eradiate/nanodisort/test.yml?branch=main&style=flat-square
+[ci-url]: https://github.com/eradiate/nanodisort/actions/workflows/test.yml
+[docs-badge]: https://img.shields.io/readthedocs/nanodisort?style=flat-square
+[docs-url]: https://nanodisort.readthedocs.io/latest/
 
 Python bindings for [CDISORT](http://www.libradtran.org/doku.php?id=cdisort), a C implementation of the DISORT (Discrete Ordinates Radiative Transfer) solver.
 
