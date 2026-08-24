@@ -1,0 +1,6 @@
+[formatting]
+align_entries = false
+align_comments = false
+indent_string = "  "
+column_width = 88
+reorder_keys = false
