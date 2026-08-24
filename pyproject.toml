@@ -4,8 +4,8 @@ version = "0.3.0.dev1"
 description = "Python bindings for the CDISORT radiative transfer solver"
 readme = "README.md"
 authors = [{ name = "Vincent Leroy", email = "vincent.leroy@rayference.eu" }]
-requires-python = ">=3.9,<3.14"
-dependencies = ["numpy>=1.20"]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.20", "nanobind-backend>=1.0"]
 license = { text = "GPL-3.0-or-later" }
 keywords = ["radiative transfer", "atmosphere", "DISORT", "remote sensing"]
 classifiers = [
@@ -13,11 +13,11 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Atmospheric Science",
   "Topic :: Scientific/Engineering :: Physics",
 ]
@@ -38,13 +38,13 @@ docs = [
   "myst-nb>=1.0.0",
   "sphinx-copybutton>=0.5.2",
 ]
-build = ["nanobind>=2.9.0", "scikit-build-core>=0.11.0"]
+build = ["nanobind>=3.0", "scikit-build-core>=0.11.0"]
 test = ["pytest>=7.0", "pytest-cov>=4.0"]
 benchmark = ["pytest-benchmark"]
 dev = [
   "ipykernel>=6.31.0",
   "jupyterlab",
-  "nanobind>=2.9.2",
+  "nanobind>=3.0",
   "ruff>=0.1.0",
   "taskipy>=1.12.0",
   { include-group = "build" },
@@ -54,7 +54,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["scikit-build-core>=0.11.0", "nanobind>=2.9.0"]
+requires = ["scikit-build-core>=0.11.0", "nanobind>=3.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
@@ -62,6 +62,7 @@ minimum-version = "0.11"
 build-dir = "build/{wheel_tag}"
 build.verbose = true
 editable.mode = "redirect"
+wheel.py-api = "cp310" # Split-mode extension targets the Python 3.10 stable ABI
 install.components = ["python"]
 wheel.packages = ["src/nanodisort"]
 
@@ -100,7 +101,7 @@ exclude_lines = [
 ]
 
 [tool.cibuildwheel]
-build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+build = "cp310-*" # Single abi3 wheel per platform, covers Python 3.10 and later
 skip = ["pp*", "*-musllinux_*"]
 
 [tool.cibuildwheel.linux]
@@ -112,7 +113,7 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "10.13" }
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py310"
 src = ["src", "tests"]
 
 [tool.ruff.lint]

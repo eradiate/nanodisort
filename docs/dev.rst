@@ -8,7 +8,7 @@ Prerequisites
 * C compiler (gcc, clang)
 * CMake 3.15 or later
 * `uv <https://github.com/astral-sh/uv>`__
-* Python 3.9 to 3.13
+* Python 3.10 and later
 * NumPy 1.20 or later
 
 Quick instructions
