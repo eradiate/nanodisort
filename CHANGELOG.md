@@ -2,6 +2,9 @@
 
 ## v0.3.0 (unreleased)
 
+* Added bindings for `radius` and `zd`, required to use the pseudo-spherical
+  correction. The `spher` flag was previously bound without them, which made it
+  silently produce a degenerate geometry.
 * Built with nanobind 3.0 in split mode: the nanobind runtime now lives in the
   separate `nanobind-backend` package, and nanodisort ships a single abi3 wheel
   per platform instead of one per Python version.

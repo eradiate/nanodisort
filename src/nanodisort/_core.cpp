@@ -168,6 +168,36 @@ nb::object make_readonly(T&& arr) {
     .def_prop_ro(#name, &DisortState::get_##name, nb::rv_policy::move, doc)
 
 /*
+ * Validate the pseudo-spherical geometry inputs.
+ *
+ * cdisort only checks ZD(lc) > ZD(lc-1), which a never-set (all-zeros) zd array
+ * passes; equal levels then divide by zero in c_chapman. Require a strict
+ * decrease, a zero bottom level, and a positive radius, so a forgotten input
+ * raises instead of silently producing a degenerate geometry.
+ *
+ * zd may be NULL, meaning "never set".
+ */
+static void check_spherical_geometry(double radius, const double* zd, int nlyr) {
+    if (radius <= 0.0) {
+        throw std::runtime_error(
+            "radius must be positive when spher=True (same units as zd)");
+    }
+    if (!zd) {
+        throw std::runtime_error("zd must be set when spher=True");
+    }
+    if (zd[nlyr] != 0.0) {
+        throw std::runtime_error(
+            "zd[nlyr] must be 0: levels are heights above the bottom surface");
+    }
+    for (int lc = 1; lc <= nlyr; lc++) {
+        if (zd[lc] >= zd[lc - 1]) {
+            throw std::runtime_error(
+                "zd must be strictly decreasing: zd[0] is the top level");
+        }
+    }
+}
+
+/*
  * DisortState class - wraps cdisort's disort_state structure
  *
  * This class manages the lifecycle of the disort_state structure and provides
@@ -228,6 +258,10 @@ public:
             throw std::runtime_error("Memory not allocated. Call allocate() first.");
         }
 
+        if (ds.flag.spher == TRUE) {
+            check_spherical_geometry(ds.radius, ds.zd, ds.nlyr);
+        }
+
         c_disort(&ds, &out);
     }
 
@@ -270,6 +304,9 @@ public:
     DEFINE_SCALAR_PROPERTY(accur, ds.accur)
     DEFINE_SCALAR_PROPERTY(wvnmlo, ds.wvnmlo)
     DEFINE_SCALAR_PROPERTY(wvnmhi, ds.wvnmhi)
+
+    // Pseudo-spherical geometry (used only when spher=True)
+    DEFINE_SCALAR_PROPERTY(radius, ds.radius)
 
     // Array setters/getters - require allocation first
     DEFINE_ARRAY_PROPERTY(dtauc, ds.dtauc, ds.nlyr)
@@ -357,6 +394,7 @@ public:
     DEFINE_ARRAY_PROPERTY(phi, ds.phi, ds.nphi)
     DEFINE_ARRAY_PROPERTY(utau, ds.utau, ds.ntau)
     DEFINE_ARRAY_PROPERTY(temper, ds.temper, ds.nlyr + 1)
+    DEFINE_ARRAY_PROPERTY(zd, ds.zd, ds.nlyr + 1)
 
     // Output accessors (read-only) - create copies owned by Python
     DEFINE_OUTPUT_RADIANT(rfldir, rfldir)
@@ -455,6 +493,7 @@ public:
     std::vector<double> shared_phi_;
     std::vector<double> shared_utau_;
     std::vector<double> shared_temper_;
+    std::vector<double> shared_zd_;
 
     // Thread pool
     std::unique_ptr<ThreadPool> pool_;
@@ -517,6 +556,9 @@ public:
     DEFINE_SCALAR_PROPERTY(wvnmlo, proto.wvnmlo)
     DEFINE_SCALAR_PROPERTY(wvnmhi, proto.wvnmhi)
 
+    // Pseudo-spherical geometry (used only when spher=True)
+    DEFINE_SCALAR_PROPERTY(radius, proto.radius)
+
     // --- Shared array setters (stored locally, copied during allocate) ---
     void set_umu(ArrayD1 arr) {
         if (static_cast<int>(arr.shape(0)) != proto.numu)
@@ -542,6 +584,12 @@ public:
         shared_temper_.assign(arr.data(), arr.data() + arr.shape(0));
     }
 
+    void set_zd(ArrayD1 arr) {
+        if (static_cast<int>(arr.shape(0)) != proto.nlyr + 1)
+            throw std::runtime_error("zd size mismatch. Expected " + std::to_string(proto.nlyr + 1));
+        shared_zd_.assign(arr.data(), arr.data() + arr.shape(0));
+    }
+
     // --- Allocation ---
     int get_nbatch() const { return nbatch_; }
     int get_nthreads() const { return nthreads_; }
@@ -562,6 +610,14 @@ public:
             throw std::runtime_error("BatchSolver requires quiet=True for thread safety.");
         if (proto.flag.lamber != TRUE)
             throw std::runtime_error("BatchSolver requires lamber=True for thread safety.");
+
+        if (proto.flag.spher == TRUE) {
+            check_spherical_geometry(
+                proto.radius,
+                shared_zd_.empty() ? nullptr : shared_zd_.data(),
+                proto.nlyr
+            );
+        }
 
         // Warm up cdisort statics on the main thread
         ensure_warmup();
@@ -611,6 +667,8 @@ public:
                 std::copy_n(shared_utau_.data(), shared_utau_.size(), states_[i].utau);
             if (!shared_temper_.empty())
                 std::copy_n(shared_temper_.data(), shared_temper_.size(), states_[i].temper);
+            if (!shared_zd_.empty())
+                std::copy_n(shared_zd_.data(), shared_zd_.size(), states_[i].zd);
         }
 
         // Create thread pool
@@ -955,6 +1013,8 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(accur, "Convergence criterion for azimuthal series.")
         BIND_PROPERTY_RW(wvnmlo, "Wavenumber lower bound [cm⁻¹] for Planck function.")
         BIND_PROPERTY_RW(wvnmhi, "Wavenumber upper bound [cm⁻¹] for Planck function.")
+        BIND_PROPERTY_RW(radius, "Planet radius, same units as zd. Typically 6371 km "
+                                 "for the Earth. Required when spher=True.")
         // Optical property arrays
         BIND_PROPERTY_RW(dtauc, "Optical thicknesses of computational layers [nlyr].")
         BIND_PROPERTY_RW(ssalb, "Single-scattering albedo of computational layers [nlyr].")
@@ -966,6 +1026,8 @@ NB_MODULE(_core, m) {
         BIND_PROPERTY_RW(phi, "Azimuthal angles [degrees] [nphi].")
         BIND_PROPERTY_RW(utau, "User optical thicknesses [ntau].")
         BIND_PROPERTY_RW(temper, "Temperatures [K] at levels [nlyr+1].")
+        BIND_PROPERTY_RW(zd, "Level heights above the bottom surface [nlyr+1], "
+                             "strictly decreasing with zd[nlyr]=0. Required when spher=True.")
         // Output arrays (read-only)
         BIND_PROPERTY_RO(rfldir, "Direct beam flux (without delta-M scaling) [ntau].")
         BIND_PROPERTY_RO(rfldn, "Diffuse downward flux (without delta-M scaling) [ntau].")
@@ -1035,6 +1097,8 @@ NB_MODULE(_core, m) {
         BIND_BATCH_PROPERTY_RW(accur, "Convergence criterion for azimuthal series.")
         BIND_BATCH_PROPERTY_RW(wvnmlo, "Wavenumber lower bound [cm⁻¹].")
         BIND_BATCH_PROPERTY_RW(wvnmhi, "Wavenumber upper bound [cm⁻¹].")
+        BIND_BATCH_PROPERTY_RW(radius, "Planet radius, same units as zd. Typically 6371 km "
+                                       "for the Earth. Required when spher=True.")
         // Shared array setters
         .def("set_umu", &BatchSolver::set_umu, "umu"_a,
              "Set shared polar angle cosines [numu].")
@@ -1044,6 +1108,9 @@ NB_MODULE(_core, m) {
              "Set shared user optical thicknesses [ntau].")
         .def("set_temper", &BatchSolver::set_temper, "temper"_a,
              "Set shared level temperatures [nlyr+1].")
+        .def("set_zd", &BatchSolver::set_zd, "zd"_a,
+             "Set shared level heights above the bottom surface [nlyr+1], "
+             "strictly decreasing with zd[nlyr]=0. Required when spher=True.")
         // Batched input setters
         .def("set_dtauc", &BatchSolver::set_dtauc, "dtauc"_a,
              "Set optical thicknesses [nbatch, nlyr].")
