@@ -34,8 +34,9 @@ pip install nanodisort
 Prerequisites:
 
 - Supported platforms: Linux, macOS
-- Python 3.9 to 3.13
+- Python 3.10 and later
 - NumPy 1.20 or later
+- `nanobind-backend` (installed automatically)
 
 ## Quickstart
 

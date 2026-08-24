@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Python and nanobind
-find_package(Python 3.9 REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(nanobind CONFIG REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -34,11 +34,13 @@ target_compile_options(cdisort PRIVATE
 )
 target_link_libraries(cdisort PUBLIC m)  # Link math library
 
-# Python extension module using nanobind
+# Python extension module using nanobind, built in split mode: the nanobind
+# runtime is resolved at import time from the nanobind_backend module, so a
+# single abi3 wheel per platform covers all supported Python versions.
 nanobind_add_module(_core
     src/nanodisort/_core.cpp
     src/nanodisort/thread_pool.cpp
-    NB_STATIC  # Use static linking with nanobind
+    BACKEND_MODULE nanobind_backend
 )
 
 # Link cdisort library to Python extension
