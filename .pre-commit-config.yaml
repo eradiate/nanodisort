@@ -4,7 +4,7 @@ repos:
       - id: uv-export-docs
         name: Export docs requirements
         language: system
-        entry: uv run task docs-lock
+        entry: uv run poe docs-lock
         files: ^(uv\.lock|pyproject\.toml)$
         pass_filenames: false
   - repo: https://github.com/astral-sh/ruff-pre-commit

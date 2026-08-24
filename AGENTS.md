@@ -16,10 +16,10 @@ uv sync --dev
 uv pip install -ve .
 
 # Run all tests
-uv run task test
+uv run poe test
 
 # Run tests with coverage
-uv run task test-cov
+uv run poe test-cov
 
 # Run a single test file
 uv run pytest tests/test_disotest.py -v
@@ -28,16 +28,16 @@ uv run pytest tests/test_disotest.py -v
 uv run pytest tests/test_disotest.py::TestDisort01::test_case_1a -v
 
 # Lint
-uv run task lint
+uv run poe lint
 
 # Format
-uv run task format
+uv run poe format
 
 # Check (lint + format check)
-uv run task check
+uv run poe check
 
 # Build docs
-uv run task docs
+uv run poe docs
 ```
 
 ## Architecture

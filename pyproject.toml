@@ -45,8 +45,8 @@ dev = [
   "ipykernel>=6.31.0",
   "jupyterlab",
   "nanobind>=3.0",
+  "poethepoet>=0.48.0",
   "ruff>=0.1.0",
-  "taskipy>=1.12.0",
   { include-group = "build" },
   { include-group = "docs" },
   { include-group = "test" },
@@ -63,8 +63,8 @@ build-dir = "build/{wheel_tag}"
 build.verbose = true
 editable.mode = "redirect"
 wheel.py-api = "cp310" # Split-mode extension targets the Python 3.10 stable ABI
-install.components = ["python"]
 wheel.packages = ["src/nanodisort"]
+install.components = ["python"]
 
 [tool.scikit-build.cmake.define]
 CMAKE_CXX_STANDARD = "17"
@@ -119,14 +119,14 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["F", "I"]
 
-[tool.taskipy.tasks]
+[tool.poe.tasks]
 # Development tasks
 test = "pytest"
 test-cov = "pytest --cov=nanodisort --cov-report=term-missing --cov-report=html"
 lint = "ruff check src tests"
 format = "ruff format src tests"
 format-check = "ruff format --check src tests"
-check = "ruff check src tests && ruff format --check src tests"
+check = ["lint", "format-check"]
 benchmark = { cmd = "pytest benchmarks", cwd = "." }
 
 # Build tasks

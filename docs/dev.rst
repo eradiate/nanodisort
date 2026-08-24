@@ -34,28 +34,28 @@ Setup development environment
 Run tests
     .. code-block:: bash
 
-        uv run task test
+        uv run poe test
 
 Run benchmarks
     .. code-block:: bash
 
-        uv run task benchmark
+        uv run poe benchmark
 
 Run linting
     .. code-block:: bash
 
-        uv run task lint
+        uv run poe lint
 
 Format code
     .. code-block:: bash
 
-        uv run task format
+        uv run poe format
 
 Build documentation
     .. code-block:: bash
 
-        uv run task docs  # static build
-        uv run task docs-serve  # server with auto-rebuild
+        uv run poe docs  # static build
+        uv run poe docs-serve  # server with auto-rebuild
 
 Release sequence
 ----------------
