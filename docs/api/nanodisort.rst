@@ -53,6 +53,7 @@
     .. autoattribute:: accur
     .. autoattribute:: wvnmlo
     .. autoattribute:: wvnmhi
+    .. autoattribute:: radius
 
     .. rubric:: Optical property arrays
         :heading-level: 3
@@ -70,6 +71,7 @@
     .. autoattribute:: phi
     .. autoattribute:: utau
     .. autoattribute:: temper
+    .. autoattribute:: zd
 
     .. rubric:: Output arrays (read-only, always present)
         :heading-level: 3
@@ -151,6 +153,7 @@
     .. autoattribute:: accur
     .. autoattribute:: wvnmlo
     .. autoattribute:: wvnmhi
+    .. autoattribute:: radius
 
     .. rubric:: Shared input arrays
         :heading-level: 3
@@ -159,6 +162,7 @@
     .. automethod:: set_phi
     .. automethod:: set_utau
     .. automethod:: set_temper
+    .. automethod:: set_zd
 
     .. rubric:: Batched input setters
         :heading-level: 3

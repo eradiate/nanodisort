@@ -87,6 +87,7 @@ class DisortState(_DisortState):
     accur: float
     wvnmlo: float
     wvnmhi: float
+    radius: float
     dtauc: NDArray[np.float64]
     ssalb: NDArray[np.float64]
     pmom: NDArray[np.float64]
@@ -96,6 +97,7 @@ class DisortState(_DisortState):
     phi: NDArray[np.float64]
     utau: NDArray[np.float64]
     temper: NDArray[np.float64]
+    zd: NDArray[np.float64]
     rfldir: NDArray[np.float64]
     rfldn: NDArray[np.float64]
     flup: NDArray[np.float64]
@@ -160,7 +162,7 @@ class DisortState(_DisortState):
             "ttemp",
             "temis",
         ]
-        others_scalar = ["accur", "wvnmlo", "wvnmhi"]
+        others_scalar = ["accur", "wvnmlo", "wvnmhi", "radius"]
         others_array = [
             "dtauc",
             "ssalb",
@@ -168,6 +170,7 @@ class DisortState(_DisortState):
             "phi",
             "utau",
             "temper",
+            "zd",
         ]
 
         if pad is None:
@@ -278,6 +281,7 @@ class BatchSolver(_BatchSolver):
     accur: float
     wvnmlo: float
     wvnmhi: float
+    radius: float
     rfldir: NDArray[np.float64]
     rfldn: NDArray[np.float64]
     flup: NDArray[np.float64]
