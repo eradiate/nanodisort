@@ -1374,7 +1374,7 @@ wheels = [
 
 [[package]]
 name = "nanodisort"
-version = "0.3.0.dev1"
+version = "0.3.0rc1"
 source = { editable = "." }
 dependencies = [
     { name = "nanobind-backend" },
