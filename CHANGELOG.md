@@ -1,4 +1,6 @@
-# nanodisort changelog
+# nanodisort — changelog
+
+---
 
 ## v0.3.0 (unreleased)
 

@@ -1,5 +1,8 @@
-nanodisort documentation
-========================
+:hide-toc:
+:layout: landing
+
+nanodisort
+==========
 
 **Date**: |today| |
 **Version**: |version|
@@ -8,127 +11,76 @@ nanodisort documentation
 DISORT (Discrete Ordinates Radiative Transfer) program for solving the
 radiative transfer equation.
 
-Overview
---------
+.. grid:: 1 1 2 3
+    :gutter: 2
+    :padding: 0
 
-DISORT is a widely-used solver for radiative transfer in plane-parallel
-atmospheres. It uses the discrete ordinates method to solve the radiative
-transfer equation, handling:
+    .. grid-item-card:: :iconify:`material-symbols:book-2 height=1.5em` Docs
+        :link: user_guide/overview
+        :link-type: doc
 
-- Multiple scattering
-- Absorption and emission
-- Various boundary conditions
-- Thermal emission (Planck function)
-- Pseudo-spherical geometry for the direct beam
+        Read the user guide.
 
-The CDISORT library is a C translation of the original Fortran DISORT code,
-offering improved performance through dynamic memory allocation and full
-double precision arithmetic.
+    .. grid-item-card:: :iconify:`material-symbols:school height=1.5em` Examples
+        :link: examples/index
+        :link-type: doc
 
-Installation
-------------
+        Learn to use the DISORT backend with practical examples.
 
-.. code-block:: bash
+    .. grid-item-card:: :iconify:`material-symbols:description height=1.5em` API reference
+        :link: api/index
+        :link-type: doc
 
-    pip install nanodisort
+        Browse the API reference.
 
-Prerequisites:
+    .. grid-item-card:: :iconify:`material-symbols:code height=1.5em` Developer guide
+        :link: dev
+        :link-type: doc
 
-- Supported platforms: Linux, macOS
-- Python 3.10 and later
-- NumPy 1.20 or later
-- ``nanobind-backend`` (installed automatically)
+        Contribute to and maintain the DISORT backend.
 
-Quickstart
------------
+    .. grid-item-card:: :iconify:`mdi:clock height=1.5em` Changelog
+        :link: changelog
+        :link-type: doc
 
-.. code-block:: python
+        Release history and migration notes.
 
-    import nanodisort as nd
+    .. grid-item-card:: :iconify:`simple-icons:github height=1.5em` GitHub
+        :link: https://github.com/eradiate/nanodisort/
 
-    # Create solver state
-    state = nd.DisortState()
-
-    # Configure dimensions
-    state.nstr = 8   # Number of streams
-    state.nlyr = 6   # Number of layers
-    state.nmom = 8   # Number of phase function moments
-    state.ntau = 5   # Number of output optical thicknesses
-    state.numu = 4   # Number of output polar angles
-    state.nphi = 3   # Number of output azimuthal angles
-
-    # Allocate memory
-    state.allocate()
-
-    # Set optical properties, geometry, boundary conditions
-    # ... (see API documentation)
-
-    # Solve
-    state.solve()
-
-Why another Python DISORT wrapper?
-----------------------------------
-
-This project fills a specific niche that was not addressed by existing Python-centric DISORT implementations or wrappers. Hereafter follows a non-exhaustive review of existing solutions and how nanodisort relates to them.
-
-Fortran and C DISORT implementations
-    This Fortran implementation :cite:p:`Stamnes1988DISORT,Stamnes2000DISORTReport` has issues that were solved later by CDISORT. The CDISORT paper :cite:p:`Buras2011CDISORTCorrection` motivates the CDISORT project and explains why we decided to wrap CDISORT rather than DISORT.
-
-`pydisort <https://github.com/zoeyzyhu/pydisort>`__
-    This project wraps CDISORT as well, with `pybind11 <https://github.com/pybind/pybind11>`__. Its goals differ from this project's in that nandisort has more modest ambitions: we do not aim to expose a specific C++ interface to CDISORT, and we do not seek integration with ML frameworks.
-
-`Pythonic-DISORT <https://github.com/LDEO-CREW/Pythonic-DISORT>`__
-    This project is very different from nanodisort: it is a reimplementation of the original DISORT algorithm in Python. It uses Numpy and vectorizes many performance-critical operations, which makes it a serious alternative to consider for people who want to use the original DISORT in Python. It also provides a comprehensive introduction to DISORT.
-
-`pyDISORT <https://github.com/mjwolff/pyDISORT>`__
-    This project wraps the Fortran implementation of DISORT (with minimal changes) at a low level and is, in its philosophy, similar to nanodisort.
-
-`pyRT_DISORT <https://github.com/mjwolff/pyRT_DISORT>`__
-    This package assists pyDISORT users in the creation of their input and does not provide radiative transfer simulation features directly.
-
-Knowing that, the following major goals we set and choices we made for nanodisort are:
-
-* A **thin Python wrapper around CDISORT**: there is no intermediate C++ API.
-* An API that is **as close to the CDISORT API as possible**: no hidden operations, only error handling has been modified to allow raising exceptions instead of terminating execution.
-* Full **interoperability with Numpy buffers**: all input data arrays can be assigned NumPy data.
-* **Lightweight**: no required dependency on large computational frameworks (e.g. PyTorch, JAX or TensorFlow).
-
-Acknowledgments
----------------
-
-nanodisort authors are grateful to the developers of the many implementations of DISORT, and, in particular, to
-
-- Timothy E. Dowling (original CDISORT C translation);
-- Robert Buras (phase function extensions);
-- Arve Kylling (pseudo-spherical approximation, testing);
-- the original DISORT Fortran authors (Knuth Stamnes, Si-Chee Tsay, Warren Wiscombe and Kolf Jayaweera).
-
-Citation
---------
-
-If you use nanodisort in your research, please cite the CDISORT paper :cite:p:`Buras2011CDISORTCorrection` and the nanodisort repository:
-
-.. code:: bibtex
-
-    @software{Leroy_nanodisort,
-        author = {Leroy, Vincent and Emde, Claudia},
-        license = {GPL-3.0-or-later},
-        title = {{nanodisort}},
-        url = {https://github.com/eradiate/nanodisort},
-        version = {0.1.0}
-    }
-
-License
--------
-
-nanodisort is licensed under the GNU General Public License v3.0 or later
-(GPL-3.0-or-later), consistent with the CDISORT library it wraps.
+        Browse the source code.
 
 .. toctree::
     :maxdepth: 2
     :hidden:
+    :caption: User Guide
 
-    examples/getting_started.ipynb
+    user_guide/overview
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: Examples
+
+    examples/index
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: API Reference
+
     api/index
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: Developer Guide
+
     dev
-    references
+
+.. toctree::
+   :hidden:
+   :caption: About
+
+   changelog
+   references

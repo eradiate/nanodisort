@@ -21,6 +21,8 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "myst_nb",
+    "sphinx_design",
+    "sphinx_iconify",
 ]
 
 # Napoleon settings (for Numpydoc)
@@ -58,9 +60,12 @@ html_title = "nanodisort"
 html_theme_options = {
     "github_url": "https://github.com/eradiate/nanodisort",
     "nav_links": [
-        {"title": "Home", "url": "index"},
-        {"title": "API Reference", "url": "api"},
+        {"title": "User guide", "url": "user_guide"},
+        {"title": "Examples", "url": "examples/index"},
+        {"title": "Contributing", "url": "dev"},
+        {"title": "API", "url": "api/index"},
     ],
+    "nav_links_align": "center",
     "accent_color": "amber",
 }
 

@@ -205,10 +205,15 @@ sphinx==8.1.3
     #   shibuya
     #   sphinx-autobuild
     #   sphinx-copybutton
+    #   sphinx-design
+    #   sphinx-iconify
     #   sphinxcontrib-bibtex
 sphinx-autobuild==2024.10.3 ; python_full_version < '3.11'
 sphinx-autobuild==2025.8.25 ; python_full_version >= '3.11'
 sphinx-copybutton==0.5.2
+sphinx-design==0.6.1 ; python_full_version < '3.11'
+sphinx-design==0.7.0 ; python_full_version >= '3.11'
+sphinx-iconify==0.3.0
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
 sphinxcontrib-bibtex==2.6.5
