@@ -34,9 +34,9 @@ pip install nanodisort
 Prerequisites:
 
 - Supported platforms: Linux, macOS
-- Python 3.10 and later
+- Python 3.10 or later
 - NumPy 1.20 or later
-- `nanobind-backend` (installed automatically)
+- [Nanobind's split build mode backend](https://nanobind.readthedocs.io/en/latest/split_mode.html)
 
 ## Quickstart
 
@@ -126,6 +126,6 @@ If you use nanodisort in your research, please cite the [CDISORT paper](https://
     license = {GPL-3.0-or-later},
     title = {{nanodisort}},
     url = {https://github.com/eradiate/nanodisort},
-    version = {0.2.0}
+    version = {0.3.0}
 }
 ```
