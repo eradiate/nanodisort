@@ -27,7 +27,7 @@ Prerequisites:
 - Supported platforms: Linux, macOS
 - Python 3.10 and later
 - NumPy 1.20 or later
-- ``nanobind-backend`` (installed automatically)
+- `Nanobind's split build mode backend <https://nanobind.readthedocs.io/en/latest/split_mode.html>`__
 
 Quickstart
 -----------

@@ -60,13 +60,14 @@ html_title = "nanodisort"
 html_theme_options = {
     "github_url": "https://github.com/eradiate/nanodisort",
     "nav_links": [
-        {"title": "User guide", "url": "user_guide"},
+        {"title": "User guide", "url": "user_guide/overview"},
         {"title": "Examples", "url": "examples/index"},
         {"title": "Contributing", "url": "dev"},
         {"title": "API", "url": "api/index"},
     ],
     "nav_links_align": "center",
     "accent_color": "amber",
+    "navigation_with_keys": True,
 }
 
 # Autodoc options
