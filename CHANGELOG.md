@@ -2,7 +2,7 @@
 
 ---
 
-## v0.3.0 (25th August 2026)
+## v0.3.0 (3rd September 2026)
 
 * Added bindings for `radius` and `zd`, required to use the pseudo-spherical
   correction. The `spher` flag was previously bound without them, which made it
