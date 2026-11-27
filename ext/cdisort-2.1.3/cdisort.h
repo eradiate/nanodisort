@@ -1038,7 +1038,9 @@ void c_albtrans_spherical(disort_state *ds,
 void c_errmsg(char *messag,
               int   type);
 
+/* NANODISORT_CHANGE_BEGIN: error callback setter */
 void c_set_error_callback(void (*callback)(const char* message));
+/* NANODISORT_CHANGE_END */
 
 int c_write_bad_var(int   quiet,
                     char *varnam);

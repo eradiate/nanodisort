@@ -57,6 +57,32 @@ Build documentation
         uv run poe docs  # static build
         uv run poe docs-serve  # server with auto-rebuild
 
+Modifying the vendored CDISORT code
+-----------------------------------
+
+CDISORT is vendored in ``ext/cdisort-2.1.3/`` with local patches. Every change
+to these files must be fenced between ``NANODISORT_CHANGE_BEGIN`` and
+``NANODISORT_CHANGE_END`` comments, so that local patches can be told apart from
+upstream code (for audits and upstream upgrades):
+
+.. code-block:: c
+
+    /* NANODISORT_CHANGE_BEGIN: <what was changed and why> */
+    ...modified code...
+    /* NANODISORT_CHANGE_END */
+
+* Fence the smallest block that contains the change; use one fence per
+  contiguous change.
+* When code is replaced or removed, the ``BEGIN`` comment states briefly what
+  the original did.
+* Do not reformat or otherwise touch upstream code outside fences.
+
+To list all local patches:
+
+.. code-block:: bash
+
+    grep -n NANODISORT_CHANGE ext/cdisort-2.1.3/*
+
 Release sequence
 ----------------
 

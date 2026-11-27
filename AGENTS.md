@@ -86,6 +86,20 @@ uv run poe docs
 - `test_batch.py` - Batch solve tests
 - `test_error_handling.py` - Error condition tests
 
+### Modifying the vendored CDISORT code
+
+Every change to files under `ext/cdisort-2.1.3/` must be fenced between `NANODISORT_CHANGE_BEGIN` and `NANODISORT_CHANGE_END` comments, so that local patches can be told apart from upstream code (for audits and upstream upgrades):
+
+```c
+/* NANODISORT_CHANGE_BEGIN: <what was changed and why> */
+...modified code...
+/* NANODISORT_CHANGE_END */
+```
+
+- Fence the smallest block that contains the change; use one fence per contiguous change.
+- When code is replaced or removed, the `BEGIN` comment states briefly what the original did.
+- Do not reformat or otherwise touch upstream code outside fences.
+
 ## Key Implementation Details
 
 - Error handling: cdisort calls a registered callback that throws C++ exceptions, converted to Python RuntimeError by nanobind

@@ -201,6 +201,7 @@
 #include "cdisort.h"
 #include "locate.h"
 
+/* NANODISORT_CHANGE_BEGIN: error callback so that bindings can handle errors instead of exit() */
 /*
  * Error callback mechanism (added for Python bindings)
  * Allows external code to handle errors instead of exit()
@@ -211,6 +212,7 @@ void c_set_error_callback(void (*callback)(const char* message))
 {
   cdisort_error_callback = callback;
 }
+/* NANODISORT_CHANGE_END */
 
 /*============================= c_disort() ==============================*/
 
@@ -1246,9 +1248,11 @@ double c_bidir_reflectivity ( double       wvnmlo,
 
     break;
   default:
+    /* NANODISORT_CHANGE_BEGIN: error message passed to c_errmsg() (was "Exiting...") so the callback receives it */
     fprintf(stderr,"surface BDRF model %d not known",
 	    brdf_type);
     c_errmsg("bidir_reflectivity--surface BDRF model not known",DS_ERROR);
+    /* NANODISORT_CHANGE_END */
   }
 
   return ans;
@@ -7965,6 +7969,7 @@ void c_errmsg(char *messag,
   if (type == DS_ERROR) {
     fprintf(stderr,"\n ******* ERROR >>>>>>  %s\n",messag);
 
+    /* NANODISORT_CHANGE_BEGIN: dispatch errors to the error callback when set */
     /* If callback is set, call it instead of exit() */
     if (cdisort_error_callback != NULL) {
       cdisort_error_callback(messag);
@@ -7972,6 +7977,7 @@ void c_errmsg(char *messag,
     }
 
     /* Default behavior: exit if no callback */
+    /* NANODISORT_CHANGE_END */
     exit(1);
   }
 
@@ -11543,7 +11549,9 @@ double *c_dbl_vector(int  nl,
 
   if (nh < nl) {
     fprintf(stderr,"\n\n**error:%s, variable %s, range (%d,%d)\n","dbl_vector",name,nl,nh);
+    /* NANODISORT_CHANGE_BEGIN: c_errmsg() instead of exit(1) */
     c_errmsg("alloc error", DS_ERROR);
+    /* NANODISORT_CHANGE_END */
   }
 
   nl_safe  = (nl < 0) ? nl : 0;
