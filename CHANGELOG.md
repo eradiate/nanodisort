@@ -2,6 +2,11 @@
 
 ---
 
+## v0.3.1 (unreleased)
+
+* Added experimental Windows support.
+* Added support for Python 3.15.
+
 ## v0.3.0 (3rd September 2026)
 
 * Added bindings for `radius` and `zd`, required to use the pseudo-spherical
