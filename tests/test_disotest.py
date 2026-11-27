@@ -27,6 +27,13 @@ from numpy.testing import assert_allclose
 from nanodisort import BRDFType, DisortState
 from nanodisort.utils import phase_functions as pf
 
+# Absolute tolerance for comparisons with the reference values. Exactly zero
+# reference values are computed as differences of nearly equal terms, and the
+# remaining round-off (up to ~1e-9 for fluxes of order 1) depends on the
+# platform's libm. 1e-7 stays below the precision of the reference values
+# (6 significant digits).
+ATOL = 1e-7
+
 
 class TestDisort01:
     """
@@ -287,17 +294,17 @@ class TestDisort01:
         print(f"  dfdt:   {ds.dfdt}")
 
         # Compare with expected values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
 
         # Verify intensity
         uu = ds.uu
         print(f"  uu shape: {uu.shape}")
         print(f"  uu[:, 0, 0] (top): {uu[:, 0, 0]}")
         print(f"  uu[:, 1, 0] (bottom): {uu[:, 1, 0]}")
-        assert_allclose(uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort02:
@@ -498,17 +505,17 @@ class TestDisort02:
         print(f"  dfdt:   {ds.dfdt}")
 
         # Compare with expected values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
 
         # Verify intensity
         uu = ds.uu
         print(f"  uu shape: {uu.shape}")
         print(f"  uu[:, 0, 0] (top): {uu[:, 0, 0]}")
         print(f"  uu[:, 1, 0] (bottom): {uu[:, 1, 0]}")
-        assert_allclose(uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort03:
@@ -662,17 +669,17 @@ class TestDisort03:
         print(f"  dfdt:   {ds.dfdt}")
 
         # Compare with expected values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
 
         # Verify intensity field if expected values provided
         uu = ds.uu
         print(f"  uu shape: {uu.shape}")
         print(f"  uu[:, 0, 0] (top): {uu[:, 0, 0]}")
         print(f"  uu[:, 1, 0] (bottom): {uu[:, 1, 0]}")
-        assert_allclose(uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort04:
@@ -833,10 +840,10 @@ class TestDisort04:
         print(f"  dfdt:   {ds.dfdt}")
 
         # Compare with expected values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort05:
@@ -974,10 +981,10 @@ class TestDisort05:
 
         # Compare with expected values
         # Use looser tolerances for very small values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort06:
@@ -1335,11 +1342,11 @@ class TestDisort06:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort07:
@@ -1424,10 +1431,10 @@ class TestDisort07:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, [0.0, 1.21204e2], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, [8.62936e1, 0.0], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, [-5.13731e1, -5.41036e2], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, [0.0, 1.21204e2], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, [8.62936e1, 0.0], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, [-5.13731e1, -5.41036e2], rtol=1e-3, atol=ATOL)
 
     def test_7b(self):
         """
@@ -1483,10 +1490,10 @@ class TestDisort07:
         print(f"  dfdt:   {ds.dfdt}")
         print(f"  uu:     {ds.uu}")
 
-        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.rfldn, [0.0, 2.07786e-5], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.flup, [1.10949e-6, 0.0], rtol=1e-3, atol=1e-9)
-        assert_allclose(ds.dfdt, [8.23219e-8, -5.06461e-6], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, [0.0, 0.0], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.rfldn, [0.0, 2.07786e-5], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.flup, [1.10949e-6, 0.0], rtol=1e-3, atol=ATOL)
+        assert_allclose(ds.dfdt, [8.23219e-8, -5.06461e-6], rtol=1e-3, atol=ATOL)
         # uu shape: (numu=2, ntau=2, nphi=1)
         expected_uu = np.array(
             [
@@ -1530,15 +1537,15 @@ class TestDisort07:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=ATOL)
         assert_allclose(
-            ds.rfldn, [3.19830e2, 3.54099e2, 3.01334e2], rtol=1e-3, atol=1e-9
+            ds.rfldn, [3.19830e2, 3.54099e2, 3.01334e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.flup, [4.29572e2, 4.47018e2, 5.94576e2], rtol=1e-3, atol=1e-9
+            ds.flup, [4.29572e2, 4.47018e2, 5.94576e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.dfdt, [-8.04270e1, 2.51589e2, 7.15964e2], rtol=1e-3, atol=1e-9
+            ds.dfdt, [-8.04270e1, 2.51589e2, 7.15964e2], rtol=1e-3, atol=ATOL
         )
 
         # uu shape: (numu=4, ntau=3, nphi=2); phi order: [0, 90]
@@ -1566,7 +1573,7 @@ class TestDisort07:
                 ],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=ATOL)
 
     def test_7d(self):
         """7d: All sources, white Lambertian surface (albedo=1)."""
@@ -1602,15 +1609,15 @@ class TestDisort07:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=ATOL)
         assert_allclose(
-            ds.rfldn, [3.19830e2, 3.50555e2, 2.92063e2], rtol=1e-3, atol=1e-9
+            ds.rfldn, [3.19830e2, 3.50555e2, 2.92063e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.flup, [3.12563e2, 2.68126e2, 3.05596e2], rtol=1e-3, atol=1e-9
+            ds.flup, [3.12563e2, 2.68126e2, 3.05596e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.dfdt, [-1.68356e2, 1.01251e2, 4.09326e2], rtol=1e-3, atol=1e-9
+            ds.dfdt, [-1.68356e2, 1.01251e2, 4.09326e2], rtol=1e-3, atol=ATOL
         )
 
         expected_uu = np.array(
@@ -1637,7 +1644,7 @@ class TestDisort07:
                 ],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=ATOL)
 
     def test_7e(self):
         """7e: All sources, non-Lambertian Hapke surface."""
@@ -1673,15 +1680,15 @@ class TestDisort07:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.rfldir, [100.0, 3.67879e1, 1.35335e1], rtol=1e-3, atol=ATOL)
         assert_allclose(
-            ds.rfldn, [3.19830e2, 3.53275e2, 2.99002e2], rtol=1e-3, atol=1e-9
+            ds.rfldn, [3.19830e2, 3.53275e2, 2.99002e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.flup, [4.04300e2, 4.07843e2, 5.29248e2], rtol=1e-3, atol=1e-9
+            ds.flup, [4.04300e2, 4.07843e2, 5.29248e2], rtol=1e-3, atol=ATOL
         )
         assert_allclose(
-            ds.dfdt, [-9.98568e1, 2.17387e2, 6.38461e2], rtol=1e-3, atol=1e-9
+            ds.dfdt, [-9.98568e1, 2.17387e2, 6.38461e2], rtol=1e-3, atol=ATOL
         )
 
         expected_uu = np.array(
@@ -1708,7 +1715,7 @@ class TestDisort07:
                 ],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort08:
@@ -1864,10 +1871,10 @@ class TestDisort08:
         print(f"  dfdt:   {ds.dfdt}")
 
         # Compare with expected values
-        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.flup, expected_flup, rtol=1e-4, atol=1e-9)
-        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-4, atol=1e-9)
+        assert_allclose(ds.rfldir, expected_rfldir, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.rfldn, expected_rfldn, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.flup, expected_flup, rtol=1e-4, atol=ATOL)
+        assert_allclose(ds.dfdt, expected_dfdt, rtol=1e-4, atol=ATOL)
 
 
 class TestDisort09:
@@ -1939,24 +1946,24 @@ class TestDisort09:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=1e-9)
+        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=ATOL)
         assert_allclose(
             ds.rfldn,
             [1.0, 3.55151e-01, 1.44265e-01, 6.71445e-03, 6.16968e-07],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.flup,
             [2.27973e-01, 8.75098e-02, 3.61819e-02, 2.19291e-03, 0.0],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.dfdt,
             [8.82116e-01, 2.32366e-01, 9.33443e-02, 3.92782e-03, 1.02500e-07],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
 
         # uu shape: (numu=4, ntau=5, nphi=1)
@@ -1980,7 +1987,7 @@ class TestDisort09:
                 [[5.91345e-02], [2.31903e-02], [9.72307e-03], [5.94743e-04], [0.0]],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=ATOL)
 
     def test_9b(self):
         """
@@ -2033,24 +2040,24 @@ class TestDisort09:
         print(f"  flup:   {ds.flup}")
         print(f"  dfdt:   {ds.dfdt}")
 
-        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=1e-9)
+        assert_allclose(ds.rfldir, [0.0, 0.0, 0.0, 0.0, 0.0], rtol=1e-4, atol=ATOL)
         assert_allclose(
             ds.rfldn,
             [1.0, 4.52357e-01, 2.36473e-01, 2.76475e-02, 7.41853e-05],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.flup,
             [1.00079e-01, 4.52014e-02, 2.41941e-02, 4.16016e-03, 0.0],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.dfdt,
             [8.04577e-01, 2.55330e-01, 1.30976e-01, 1.36227e-02, 1.22022e-05],
             rtol=1e-4,
-            atol=1e-9,
+            atol=ATOL,
         )
 
         # uu shape: (numu=4, ntau=5, nphi=1)
@@ -2074,7 +2081,7 @@ class TestDisort09:
                 [[1.32768e-02], [7.05566e-03], [4.06932e-03], [7.77890e-04], [0.0]],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-4, atol=ATOL)
 
     def test_9c(self):
         """
@@ -2128,25 +2135,25 @@ class TestDisort09:
             ds.rfldir,
             [1.57080e00, 1.92354e-01, 2.35550e-02, 9.65131e-06, 9.03133e-19],
             rtol=1e-3,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.rfldn,
             [6.09217e00, 4.97279e00, 4.46616e00, 4.22731e00, 4.73767e00],
             rtol=1e-3,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.flup,
             [4.68414e00, 4.24381e00, 4.16941e00, 4.30667e00, 5.11524e00],
             rtol=1e-3,
-            atol=1e-9,
+            atol=ATOL,
         )
         assert_allclose(
             ds.dfdt,
             [3.49563e00, 8.81206e-01, 3.50053e-01, 1.93471e-02, 7.15349e-02],
             rtol=1e-3,
-            atol=1e-9,
+            atol=ATOL,
         )
 
         # uu shape: (numu=4, ntau=5, nphi=3); phi order: [60, 120, 180]
@@ -2182,7 +2189,7 @@ class TestDisort09:
                 ],
             ]
         )
-        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=1e-9)
+        assert_allclose(ds.uu, expected_uu, rtol=1e-3, atol=ATOL)
 
 
 class TestDisort10:

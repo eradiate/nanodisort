@@ -479,35 +479,26 @@ typedef struct {
 
 #define DEG (M_PI/180.)
 
-#define SQR(x) ({ \
-          const double _x = (double)(x); \
-          _x*_x; })
+/* NANODISORT_CHANGE_BEGIN: inline functions instead of GNU statement-expression macros (unsupported by MSVC) */
+/* Inline functions keep single evaluation of arguments, like the original macros. */
+static inline double c_sqr_(double x) { return x*x; }
+static inline double c_min_(double x, double y) { return x < y ? x : y; }
+static inline double c_max_(double x, double y) { return x > y ? x : y; }
+static inline double c_limit_range_(double min, double x, double max) {
+  return x < min ? min : ( x > max ? max : x );
+}
+static inline int c_imin_(int i, int j) { return i < j ? i : j; }
+static inline int c_imax_(int i, int j) { return i > j ? i : j; }
+/* Planck function integrand x^3/(e^x-1), used by c_planck_func1() and c_planck_func2() */
+static inline double c_plkf_(double x) { return x*x*x/(exp(x)-1.); }
 
-#define MIN(x,y) ({ \
-         const double _x = (double)(x); \
-         const double _y = (double)(y); \
-         _x < _y ? _x : _y; })
-
-#define MAX(x,y) ({ \
-         const double _x = (double)(x); \
-         const double _y = (double)(y); \
-         _x > _y ? _x : _y; })
-
-#define LIMIT_RANGE(min,x,max) ({ \
-         const double _min = (double)(min); \
-         const double _x   = (double)(x);   \
-         const double _max = (double)(max); \
-         _x < _min ? _min : ( _x > _max ? _max : _x ); })
-
-#define IMIN(i,j) ({ \
-         const int _i = (int)(i); \
-         const int _j = (int)(j); \
-         _i < _j ? _i : _j; })
-
-#define IMAX(i,j) ({ \
-         const int _i = (int)(i); \
-         const int _j = (int)(j); \
-         _i > _j ? _i : _j; })
+#define SQR(x)                 c_sqr_((double)(x))
+#define MIN(x,y)               c_min_((double)(x),(double)(y))
+#define MAX(x,y)               c_max_((double)(x),(double)(y))
+#define LIMIT_RANGE(min,x,max) c_limit_range_((double)(min),(double)(x),(double)(max))
+#define IMIN(i,j)              c_imin_((int)(i),(int)(j))
+#define IMAX(i,j)              c_imax_((int)(i),(int)(j))
+/* NANODISORT_CHANGE_END */
 
 #define F77_SIGN(a,b) ((b) >= 0. ? fabs(a) : -fabs(a))
 

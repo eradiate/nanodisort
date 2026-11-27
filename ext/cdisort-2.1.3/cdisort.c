@@ -417,9 +417,10 @@ void c_disort(disort_state  *ds,
     iq,iu,j,kconv,l,lc,lev,lu,mazim,naz,ncol,ncos,ncut,nn;
   static int
     callnum=1;
+  /* NANODISORT_CHANGE_BEGIN: heap arrays instead of VLAs ipvt[nstr*nlyr], layru[ntau] (unsupported by MSVC) */
   int
-    ipvt[ds->nstr*ds->nlyr],
-    layru[ds->ntau];
+    *ipvt,*layru;
+  /* NANODISORT_CHANGE_END */
   double
     angcos,azerr,azterm,bplanck,cosphi,delm0,
     sgn,tplanck;
@@ -510,7 +511,11 @@ void c_disort(disort_state  *ds,
   /*
    * Allocate zeroed memory
    */
-  tauc = c_dbl_vector(0,ds->nlyr,"tauc");
+  tauc  = c_dbl_vector(0,ds->nlyr,"tauc");
+  /* NANODISORT_CHANGE_BEGIN: allocate former VLAs */
+  ipvt  = c_int_vector(0,ds->nstr*ds->nlyr-1,"ipvt");
+  layru = c_int_vector(0,ds->ntau-1,"layru");
+  /* NANODISORT_CHANGE_END */
 
   for (lc = 1; lc <= ds->nlyr; lc++) {
     if(SSALB(lc) == 1.) {
@@ -597,6 +602,9 @@ void c_disort(disort_state  *ds,
     free(expbea),free(flyr), free(gc),  free(gl),     free(gu),    free(kk);
     free(ll),    free(oprim),free(tauc),free(taucpr), free(utaupr),free(wk);
     free(ylmc),  free(ylmu), free(z),   free(ab);
+    /* NANODISORT_CHANGE_BEGIN: free former VLAs */
+    free(ipvt),  free(layru);
+    /* NANODISORT_CHANGE_END */
 
     return;
   }
@@ -1027,6 +1035,9 @@ void c_disort(disort_state  *ds,
   free(z),free(zbu),free(zbeam),free(zbeamsp),
   free(zbeama),free(zbs),free(zj),free(zjg),free(zju),
   free(zgu),free(zz),free(zzg),free(zee),free(zu);
+  /* NANODISORT_CHANGE_BEGIN: free former VLAs */
+  free(ipvt),free(layru);
+  /* NANODISORT_CHANGE_END */
 
   return;
 }
@@ -6482,7 +6493,9 @@ void c_legendre_poly(int     nmu,
    Calls- c_errmsg
  ----------------------------------------------------------------------*/
 
-#define PLKF(x) ({const double _x = (x); _x*_x*_x/(exp(_x)-1.);})
+/* NANODISORT_CHANGE_BEGIN: inline function instead of GNU statement expression (unsupported by MSVC) */
+#define PLKF(x) c_plkf_((double)(x))
+/* NANODISORT_CHANGE_END */
 #define A1    (1./3.)
 #define A2    (-1./8.)
 #define A3    (1./60.)
@@ -9603,9 +9616,10 @@ void c_twostr(disort_state  *ds,
     lc,ierr;
   int
     lyrcut,iret,ncut,nn;
+  /* NANODISORT_CHANGE_BEGIN: heap arrays instead of VLAs ipvt[nstr*nlyr], layru[ntau] (unsupported by MSVC) */
   int
-    ipvt[ds->nstr*ds->nlyr],
-    layru[ds->ntau];
+    *ipvt,*layru;
+  /* NANODISORT_CHANGE_END */
   double
     cmu,bplanck,tplanck;
   double
@@ -9641,6 +9655,10 @@ void c_twostr(disort_state  *ds,
   taucpr  = c_dbl_vector(0,ds->nlyr,"taucpr");
   u0c     = c_dbl_vector(0,ds->ntau*ds->nstr-1,"u0c");
   utaupr  = c_dbl_vector(0,ds->ntau-1,"utaupr");
+  /* NANODISORT_CHANGE_BEGIN: allocate former VLAs */
+  ipvt    = c_int_vector(0,ds->nstr*ds->nlyr-1,"ipvt");
+  layru   = c_int_vector(0,ds->ntau-1,"layru");
+  /* NANODISORT_CHANGE_END */
   /*
    * Using C structures to facilitate cache-aware memory allocation, which tends to
    * reduce cache misses and speed up computer execution.
@@ -9723,6 +9741,9 @@ void c_twostr(disort_state  *ds,
   free(b),     free(cband), free(ch),  free(chtau),free(dtaucpr),free(expbea),free(flyr),free(fl);
   free(ggprim),free(kk),    free(ll),  free(oprim),free(pkag),   free(pkagc), free(rr),  free(tauc),free(taucpr);
   free(u0c),   free(utaupr),free(diag),free(ts);
+  /* NANODISORT_CHANGE_BEGIN: free former VLAs */
+  free(ipvt),  free(layru);
+  /* NANODISORT_CHANGE_END */
 
   return;
 }
@@ -11071,7 +11092,9 @@ void c_twostr_solve_bc(disort_state *ds,
 #define C2    (1.438786)
 #define SIGMA (5.67032e-8)
 #define VCUT  (1.5)
-#define PLKF(x) ({const double _x = (x); _x*_x*_x/(exp(_x)-1.);})
+/* NANODISORT_CHANGE_BEGIN: inline function instead of GNU statement expression (unsupported by MSVC) */
+#define PLKF(x) c_plkf_((double)(x))
+/* NANODISORT_CHANGE_END */
 
 double c_planck_func2(double wnumlo,
                       double wnumhi,
@@ -11591,7 +11614,9 @@ int *c_int_vector(int  nl,
 
   if (nh < nl) {
     fprintf(stderr,"\n\n**error:%s, variable %s, range (%d,%d)\n","int_vector",name,nl,nh);
-    exit(1);
+    /* NANODISORT_CHANGE_BEGIN: c_errmsg() instead of exit(1) */
+    c_errmsg("alloc error", DS_ERROR);
+    /* NANODISORT_CHANGE_END */
   }
 
   nl_safe  = (nl < 0) ? nl : 0;
